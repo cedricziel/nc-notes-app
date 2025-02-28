@@ -16,10 +16,16 @@ class NotesProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
   NextcloudNotesApi? _api;
   bool _isLoading = false;
+  bool _isSaving = false;
+  bool _manualSave = false;
   String? _errorMessage;
+
+  // Queue for note update operations
+  final Map<String, Map<String, dynamic>> _queue = {};
 
   bool get isAuthenticated => _api != null;
   bool get isLoading => _isLoading;
+  bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
 
   List<Note> get notes => _notes;
@@ -105,7 +111,7 @@ class NotesProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Updates a note locally and on the server if authenticated
+  /// Updates a note locally and queues it for server update
   Future<void> updateNote(String id, {String? title, String? content}) async {
     // Find the note in the local collection
     final index = _notes.indexWhere((note) => note.id == id);
@@ -117,11 +123,16 @@ class NotesProvider with ChangeNotifier {
     // Get the current note
     final currentNote = _notes[index];
 
-    // Create updated note
+    // Log the current ETag before update
+    debugPrint('Current note ETag before update: ${currentNote.etag}');
+
+    // Create updated note with reference to original state for conflict detection
     final updatedNote = currentNote.copyWith(
       title: title,
       content: content,
       updatedAt: DateTime.now(),
+      unsaved: true,
+      reference: currentNote.reference ?? currentNote.createReference(),
     );
 
     // Update note in local collection
@@ -138,75 +149,285 @@ class NotesProvider with ChangeNotifier {
     // Save to local storage
     await _saveLocalData();
 
-    // If authenticated, try to save to server
+    // Queue the note for server update if authenticated
     if (_api != null) {
-      try {
-        debugPrint('Attempting to save note to server: ${updatedNote.title}');
-
-        // Check if this is a server note (has numeric ID) or local-only note
-        if (int.tryParse(id) != null) {
-          // This is a server note, update it
-          final noteId = int.parse(id);
-
-          // Use our custom method to update on server
-          final serverNote = await _updateNoteOnServer(
-            noteId,
-            updatedNote.title,
-            updatedNote.content,
-            updatedNote.folder,
-            updatedNote.favorite ?? false,
-            updatedNote.etag,
-          );
-
-          // Update local note with server etag
-          if (serverNote.etag != null) {
-            _notes[index] = updatedNote.copyWith(etag: serverNote.etag);
-
-            if (_selectedNote?.id == id) {
-              _selectedNote = _notes[index];
-            }
-          }
-
-          debugPrint('Note updated on server successfully');
-        } else {
-          // This is a local-only note, create it on server
-          debugPrint('Creating new note on server');
-
-          // Create note on server
-          final serverNote = await _api!.createNote(
-            title: updatedNote.title,
-            content: updatedNote.content,
-            category: updatedNote.folder,
-            favorite: updatedNote.favorite,
-          );
-
-          // Update local note with server ID and etag
-          _notes[index] = updatedNote.copyWith(
-            id: serverNote.id,
-            etag: serverNote.etag,
-          );
-
-          // Update selected note reference if needed
-          if (_selectedNote?.id == id) {
-            _selectedNote = _notes[index];
-          }
-
-          // Save updated note to local storage
-          await _saveLocalData();
-
-          debugPrint('Note created on server with ID: ${serverNote.id}');
-        }
-      } catch (e) {
-        debugPrint('Error saving note to server: $e');
-        setState(error: 'Failed to save note to server: $e');
-        // We don't rethrow the error because we want the local update to succeed
-        // even if the server update fails
-      }
+      // Queue the content update
+      queueCommand(id, 'content');
     } else {
       debugPrint('Not authenticated, note saved locally only');
     }
 
     // Notify listeners of changes
+    notifyListeners();
+  }
+
+  /// Add a command to the queue and process it
+  void queueCommand(String noteId, String type) {
+    debugPrint('Queueing command: $type for note $noteId');
+    _queue[noteId] = {'noteId': noteId, 'type': type};
+    _processQueue();
+  }
+
+  /// Process the queue of note updates
+  Future<void> _processQueue() async {
+    if (_isSaving || _queue.isEmpty || _api == null) {
+      return;
+    }
+
+    _isSaving = true;
+    notifyListeners();
+
+    final queueCopy = Map<String, Map<String, dynamic>>.from(_queue);
+    _queue.clear();
+
+    try {
+      for (final cmd in queueCopy.values) {
+        final noteId = cmd['noteId'] as String;
+        final type = cmd['type'] as String;
+
+        try {
+          switch (type) {
+            case 'content':
+              await _saveNoteContent(noteId);
+              break;
+            default:
+              debugPrint('Unknown queue command: $type');
+          }
+        } catch (e) {
+          debugPrint('Command failed for note $noteId: $e');
+          // Add back to queue for retry?
+          // _queue[noteId] = cmd;
+        }
+      }
+    } finally {
+      _isSaving = false;
+      _manualSave = false;
+      notifyListeners();
+
+      // Process any new queue items that were added during processing
+      if (_queue.isNotEmpty) {
+        _processQueue();
+      }
+    }
+  }
+
+  /// Save a note's content to the server
+  Future<void> _saveNoteContent(String noteId) async {
+    if (_api == null) {
+      debugPrint('Cannot save note: API is not initialized');
+      return;
+    }
+
+    // Find the note in the local collection
+    final index = _notes.indexWhere((note) => note.id == noteId);
+    if (index == -1) {
+      debugPrint('Note not found with ID: $noteId');
+      return;
+    }
+
+    final note = _notes[index];
+
+    // Mark note as not having save error
+    if (note.saveError) {
+      final updatedNote = note.copyWith(saveError: false);
+      _notes[index] = updatedNote;
+      notifyListeners();
+    }
+
+    debugPrint('Saving note to server: ${note.title}');
+    debugPrint('Using ETag: ${note.etag}');
+
+    try {
+      // Check if this is a server note (has numeric ID) or local-only note
+      if (int.tryParse(noteId) != null) {
+        // This is a server note, update it
+        final numericNoteId = int.parse(noteId);
+        await _updateExistingNote(index, numericNoteId, note);
+      } else {
+        // This is a local-only note, create it on server
+        await _createNewNoteOnServer(index, note);
+      }
+    } catch (e) {
+      // Mark note as having save error
+      final updatedNote = note.copyWith(saveError: true);
+      _notes[index] = updatedNote;
+
+      debugPrint('Error saving note to server: $e');
+      setState(error: 'Failed to save note to server: $e');
+      notifyListeners();
+    }
+  }
+
+  /// Update an existing note on the server
+  Future<void> _updateExistingNote(int index, int noteId, Note note) async {
+    try {
+      // Use our custom method to update on server
+      final serverNote = await _updateNoteOnServer(
+        noteId,
+        note.title,
+        note.content,
+        note.folder,
+        note.favorite,
+        note.etag,
+      );
+
+      // Update local note with server etag and mark as saved
+      if (serverNote.etag != null) {
+        debugPrint('Received new ETag from server: ${serverNote.etag}');
+
+        // Create a new note object with the updated etag and reference
+        final noteWithNewEtag = note.copyWith(
+          etag: serverNote.etag,
+          unsaved: false,
+          reference: note.createReference(),
+        );
+
+        // Update in the notes collection
+        _notes[index] = noteWithNewEtag;
+
+        // Update selected note reference if needed
+        if (_selectedNote?.id == note.id) {
+          _selectedNote = noteWithNewEtag;
+        }
+
+        // Save to local storage immediately to persist the new etag
+        await _saveLocalData();
+
+        debugPrint('Updated local note with new ETag and saved to storage');
+      } else {
+        debugPrint('Warning: Server returned null ETag');
+      }
+
+      debugPrint('Note updated on server successfully');
+    } catch (e) {
+      if (e.toString().contains('conflict')) {
+        // Handle conflict - this should be handled in _updateNoteOnServer
+        debugPrint('Conflict detected during note update: $e');
+      }
+      rethrow;
+    }
+  }
+
+  /// Create a new note on the server
+  Future<void> _createNewNoteOnServer(int index, Note note) async {
+    debugPrint('Creating new note on server');
+
+    // Create note on server
+    final serverNote = await _api!.createNote(
+      title: note.title,
+      content: note.content,
+      category: note.folder,
+      favorite: note.favorite,
+    );
+
+    debugPrint('Received ETag for new note: ${serverNote.etag}');
+
+    // Update local note with server ID, etag, and reference
+    final noteWithServerInfo = note.copyWith(
+      id: serverNote.id,
+      etag: serverNote.etag,
+      unsaved: false,
+      reference: serverNote.createReference(),
+    );
+
+    // Update in the notes collection
+    _notes[index] = noteWithServerInfo;
+
+    // Update selected note reference if needed
+    if (_selectedNote?.id == note.id) {
+      _selectedNote = noteWithServerInfo;
+    }
+
+    // Save updated note to local storage
+    await _saveLocalData();
+
+    debugPrint('Note created on server with ID: ${serverNote.id}');
+  }
+
+  /// Save a note manually (user-initiated save)
+  Future<void> saveNoteManually(String noteId) async {
+    debugPrint('Manual save requested for note: $noteId');
+
+    // Find the note
+    final index = _notes.indexWhere((note) => note.id == noteId);
+    if (index == -1) {
+      debugPrint('Note not found with ID: $noteId');
+      return;
+    }
+
+    // Reset save error flag
+    final note = _notes[index];
+    final updatedNote = note.copyWith(saveError: false);
+    _notes[index] = updatedNote;
+
+    // Set manual save flag
+    _manualSave = true;
+
+    // Queue the save command
+    queueCommand(noteId, 'content');
+
+    notifyListeners();
+  }
+
+  /// Handle conflict resolution - use local version
+  Future<void> conflictSolutionLocal(String noteId) async {
+    final index = _notes.indexWhere((note) => note.id == noteId);
+    if (index == -1 || _notes[index].conflict == null) {
+      debugPrint('No conflict found for note: $noteId');
+      return;
+    }
+
+    final note = _notes[index];
+    final conflict = note.conflict!;
+
+    // Use local content but take the server's etag
+    final resolvedNote = note.copyWith(
+      etag: conflict.etag,
+      conflict: null,
+      reference: conflict.createReference(),
+    );
+
+    _notes[index] = resolvedNote;
+
+    // Update selected note if needed
+    if (_selectedNote?.id == noteId) {
+      _selectedNote = resolvedNote;
+    }
+
+    await _saveLocalData();
+
+    // Queue for server update
+    queueCommand(noteId, 'content');
+
+    notifyListeners();
+  }
+
+  /// Handle conflict resolution - use remote version
+  Future<void> conflictSolutionRemote(String noteId) async {
+    final index = _notes.indexWhere((note) => note.id == noteId);
+    if (index == -1 || _notes[index].conflict == null) {
+      debugPrint('No conflict found for note: $noteId');
+      return;
+    }
+
+    final note = _notes[index];
+    final conflict = note.conflict!;
+
+    // Use the server's version entirely
+    final resolvedNote = conflict.copyWith(
+      unsaved: false,
+      conflict: null,
+      reference: conflict.createReference(),
+    );
+
+    _notes[index] = resolvedNote;
+
+    // Update selected note if needed
+    if (_selectedNote?.id == noteId) {
+      _selectedNote = resolvedNote;
+    }
+
+    await _saveLocalData();
     notifyListeners();
   }
 
@@ -293,6 +514,10 @@ class NotesProvider with ChangeNotifier {
   }
 
   /// Sync notes with the Nextcloud server
+  ///
+  /// This method fetches all notes from the server and updates the local collection.
+  /// It ensures that ETags are properly stored for each note to prevent conflicts
+  /// when saving notes back to the server.
   Future<void> syncWithServer() async {
     if (_api == null) {
       debugPrint('Cannot sync: API is not initialized');
@@ -309,8 +534,31 @@ class NotesProvider with ChangeNotifier {
       final serverNotes = await _api!.getNotes();
       debugPrint('Received ${serverNotes.length} notes from server');
 
-      // Update local notes with server notes
-      _notes = serverNotes;
+      // Log ETags for debugging
+      for (final note in serverNotes) {
+        debugPrint('Server note ID: ${note.id}, ETag: ${note.etag}');
+        if (note.etag == null || note.etag!.isEmpty) {
+          debugPrint('Warning: Note ${note.id} has no ETag from server');
+        }
+      }
+
+      // Check for local notes that need to be preserved
+      // (notes that haven't been synced to the server yet)
+      final localOnlyNotes = _notes.where((note) =>
+        int.tryParse(note.id) == null // Local notes have non-numeric IDs
+      ).toList();
+
+      if (localOnlyNotes.isNotEmpty) {
+        debugPrint('Found ${localOnlyNotes.length} local-only notes to preserve');
+      }
+
+      // Update local notes with server notes, ensuring each has a reference copy
+      final processedServerNotes = serverNotes.map((note) {
+        // Create a reference copy for each server note
+        return note.copyWith(reference: note.createReference());
+      }).toList();
+
+      _notes = [...processedServerNotes, ...localOnlyNotes];
 
       // Extract folders from notes
       final folderNames = <String>{};
@@ -329,17 +577,44 @@ class NotesProvider with ChangeNotifier {
         )
       ).toList();
 
-      // Select first note if available and none is selected
-      if (_selectedNote == null && _notes.isNotEmpty) {
+      // Update selected note reference if needed
+      if (_selectedNote != null) {
+        final selectedId = _selectedNote!.id;
+        final updatedNote = _notes.firstWhere(
+          (note) => note.id == selectedId,
+          orElse: () => _notes.isNotEmpty ? _notes.first : _selectedNote!
+        );
+
+        if (updatedNote.id != selectedId) {
+          debugPrint('Previously selected note not found, selecting a different note');
+        }
+
+        _selectedNote = updatedNote;
+      } else if (_notes.isNotEmpty) {
         debugPrint('Auto-selecting first note');
         _selectedNote = _notes.first;
       }
 
-      // Select first folder if available and none is selected
-      if (_selectedFolder == null && _folders.isNotEmpty) {
+      // Update selected folder reference if needed
+      if (_selectedFolder != null) {
+        final selectedId = _selectedFolder!.id;
+        final updatedFolder = _folders.firstWhere(
+          (folder) => folder.id == selectedId,
+          orElse: () => _folders.isNotEmpty ? _folders.first : _selectedFolder!
+        );
+
+        if (updatedFolder.id != selectedId) {
+          debugPrint('Previously selected folder not found, selecting a different folder');
+        }
+
+        _selectedFolder = updatedFolder;
+      } else if (_folders.isNotEmpty) {
         debugPrint('Auto-selecting first folder');
         _selectedFolder = _folders.first;
       }
+
+      // Sort notes by updated date (newest first)
+      _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
 
       // Save to local storage
       await _saveLocalData();
@@ -428,6 +703,9 @@ class NotesProvider with ChangeNotifier {
   }
 
   /// Helper method to update a note on the server
+  ///
+  /// This method handles ETag conflicts by automatically fetching the latest
+  /// version from the server and implementing sophisticated conflict resolution.
   Future<Note> _updateNoteOnServer(
     int noteId,
     String title,
@@ -440,45 +718,124 @@ class NotesProvider with ChangeNotifier {
       throw Exception('Not authenticated');
     }
 
+    debugPrint('Updating note on server - ID: $noteId, ETag: $etag');
+
+    // Find the note in the local collection to get the reference
+    final index = _notes.indexWhere((note) => note.id == noteId.toString());
+    if (index == -1) {
+      throw Exception('Note not found with ID: $noteId');
+    }
+
+    final note = _notes[index];
+    final reference = note.reference;
+
     try {
-      // First attempt: Try to update with the current etag
-      try {
-        return await _api!.updateNote(
-          id: noteId,
-          title: title,
-          content: content,
-          category: category,
-          favorite: favorite,
-          etag: etag,
-        );
-      } catch (e) {
-        // Check if it's a precondition failed error (412)
-        if (e.toString().contains('Precondition Failed') ||
-            e.toString().contains('412') ||
-            e.toString().contains('precondition failed')) {
-          debugPrint('ETag conflict detected, fetching latest version and retrying...');
+      // Attempt to update with the current etag
+      debugPrint('Sending update request with ETag: $etag');
+      final updatedNote = await _api!.updateNote(
+        id: noteId,
+        title: title,
+        content: content,
+        category: category,
+        favorite: favorite,
+        etag: etag,
+      );
 
-          // Fetch the latest version of the note to get the updated etag
-          final serverNote = await _fetchNoteFromServer(noteId);
+      debugPrint('Update successful, received new ETag: ${updatedNote.etag}');
 
-          // Retry the update with the new etag but our local content
-          debugPrint('Retrying update with new etag: ${serverNote.etag}');
+      // Update the note in the collection with the new etag
+      final noteWithNewEtag = note.copyWith(
+        etag: updatedNote.etag,
+        unsaved: false,
+        conflict: null,
+        reference: note.createReference(),
+      );
+
+      _notes[index] = noteWithNewEtag;
+
+      // Update selected note if needed
+      if (_selectedNote?.id == noteId.toString()) {
+        _selectedNote = noteWithNewEtag;
+      }
+
+      // Save to local storage
+      await _saveLocalData();
+
+      return updatedNote;
+    } catch (e) {
+      // Check if it's a precondition failed error (412)
+      if (e.toString().contains('Precondition Failed') ||
+          e.toString().contains('412') ||
+          e.toString().contains('precondition failed')) {
+
+        debugPrint('ETag conflict detected, attempting to resolve...');
+
+        // Fetch the latest version of the note from the server
+        final serverNote = await _fetchNoteFromServer(noteId);
+
+        // Implement TypeScript-like conflict resolution
+        if (serverNote.content == content) {
+          // Content is already up-to-date, just update with server's metadata
+          debugPrint('Content is already up-to-date on server, updating metadata');
+
+          // Update the note with server's etag but keep our content
+          final resolvedNote = note.copyWith(
+            etag: serverNote.etag,
+            unsaved: false,
+            conflict: null,
+            reference: serverNote.createReference(),
+          );
+
+          _notes[index] = resolvedNote;
+
+          // Update selected note if needed
+          if (_selectedNote?.id == noteId.toString()) {
+            _selectedNote = resolvedNote;
+          }
+
+          // Save to local storage
+          await _saveLocalData();
+
+          return serverNote;
+        } else if (reference != null && serverNote.content == reference.content) {
+          // Remote content has not changed from our reference, retry with new etag
+          debugPrint('Server content has not changed, retrying update with new etag');
+
+          // Retry the update with the new etag
           return await _api!.updateNote(
             id: noteId,
             title: title,
             content: content,
             category: category,
             favorite: favorite,
-            etag: serverNote.etag, // Use the fresh etag from the server
+            etag: serverNote.etag,
           );
         } else {
-          // For other errors, just rethrow
-          rethrow;
+          // Both local and server content have changed, manual resolution required
+          debugPrint('Content conflict detected, manual resolution required');
+
+          // Store the conflict for manual resolution
+          final noteWithConflict = note.copyWith(
+            conflict: serverNote,
+          );
+
+          _notes[index] = noteWithConflict;
+
+          // Update selected note if needed
+          if (_selectedNote?.id == noteId.toString()) {
+            _selectedNote = noteWithConflict;
+          }
+
+          // Save to local storage
+          await _saveLocalData();
+
+          throw Exception('Note update conflict. Manual resolution required.');
         }
+      } else {
+        // For other errors, log and rethrow
+        debugPrint('Error updating note on server (not an ETag conflict): $e');
+        throw Exception('Failed to update note: $e');
       }
-    } catch (e) {
-      debugPrint('Error updating note on server: $e');
-      throw Exception('Failed to update note: $e');
     }
   }
 

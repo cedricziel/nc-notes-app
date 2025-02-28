@@ -10,6 +10,10 @@ class Note {
   String? etag;
   bool readonly;
   bool favorite;
+  bool unsaved;
+  bool saveError;
+  Note? reference;  // Reference to the original server state for conflict detection
+  Note? conflict;   // Stores the server version when a conflict is detected
 
   Note({
     String? id,
@@ -21,6 +25,10 @@ class Note {
     this.etag,
     this.readonly = false,
     this.favorite = false,
+    this.unsaved = false,
+    this.saveError = false,
+    this.reference,
+    this.conflict,
   })  : id = id ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
@@ -34,6 +42,10 @@ class Note {
     String? etag,
     bool? readonly,
     bool? favorite,
+    bool? unsaved,
+    bool? saveError,
+    Note? reference,
+    Note? conflict,
   }) {
     return Note(
       id: id ?? this.id,
@@ -45,11 +57,30 @@ class Note {
       etag: etag ?? this.etag,
       readonly: readonly ?? this.readonly,
       favorite: favorite ?? this.favorite,
+      unsaved: unsaved ?? this.unsaved,
+      saveError: saveError ?? this.saveError,
+      reference: reference ?? this.reference,
+      conflict: conflict ?? this.conflict,
+    );
+  }
+
+  /// Creates a reference copy of this note for conflict detection
+  Note createReference() {
+    return Note(
+      id: this.id,
+      title: this.title,
+      content: this.content,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      folder: this.folder,
+      etag: this.etag,
+      readonly: this.readonly,
+      favorite: this.favorite,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> data = {
       'id': id,
       'title': title,
       'content': content,
@@ -59,10 +90,36 @@ class Note {
       'etag': etag,
       'readonly': readonly,
       'favorite': favorite,
+      'unsaved': unsaved,
+      'saveError': saveError,
     };
+
+    // Add reference if it exists
+    if (reference != null) {
+      data['reference'] = reference!.toJson();
+    }
+
+    // Add conflict if it exists
+    if (conflict != null) {
+      data['conflict'] = conflict!.toJson();
+    }
+
+    return data;
   }
 
   factory Note.fromJson(Map<String, dynamic> json) {
+    // Parse reference if it exists
+    Note? referenceNote;
+    if (json['reference'] != null) {
+      referenceNote = Note.fromJson(json['reference']);
+    }
+
+    // Parse conflict if it exists
+    Note? conflictNote;
+    if (json['conflict'] != null) {
+      conflictNote = Note.fromJson(json['conflict']);
+    }
+
     return Note(
       id: json['id'],
       title: json['title'],
@@ -73,6 +130,10 @@ class Note {
       etag: json['etag'],
       readonly: json['readonly'] ?? false,
       favorite: json['favorite'] ?? false,
+      unsaved: json['unsaved'] ?? false,
+      saveError: json['saveError'] ?? false,
+      reference: referenceNote,
+      conflict: conflictNote,
     );
   }
 }
