@@ -1,0 +1,105 @@
+# Nextcloud Notes Integration
+
+## Goals
+- [x] Add required dependencies (webview_flutter, flutter_secure_storage)
+- [x] Create AuthService for managing authentication
+- [x] Implement LoginScreen with WebView for Nextcloud login flow
+- [x] Update NotesProvider to use Nextcloud API when authenticated
+- [x] Update main.dart to check authentication status on startup
+- [x] Add logout functionality to NotesScreen
+- [x] Fix widget_test.dart to work with updated MyApp constructor
+- [x] Add macOS support
+
+## Implementation Details
+- Used WebView to implement Nextcloud's login flow
+- Securely store credentials using flutter_secure_storage
+- Added sync functionality to fetch notes from Nextcloud server
+- Implemented proper error handling for API requests
+- Added UI elements for login/logout and sync operations
+- Added macOS-specific UI improvements
+- Updated macOS entitlements for network access
+- Added custom URL scheme for Nextcloud authentication
+
+## macOS-specific Changes
+- Added network client entitlement to DebugProfile.entitlements and Release.entitlements
+- Added custom URL scheme (nc://) to Info.plist for handling authentication callbacks
+- Implemented responsive UI with macOS-specific adjustments
+- Added platform detection to customize UI based on platform
+
+## Bug Fixes
+- Fixed login screen button not enabling when text is entered in the server URL field
+  - Added a text controller listener to update state when text changes
+  - Created a dedicated state variable to track if the input field has text
+- Fixed 403 error when connecting to Nextcloud server
+  - Added required headers to match the iOS implementation
+  - Set custom User-Agent header
+  - Added Accept-Language header
+  - Added OCS-APIREQUEST header
+
+## Current Task: Fix Empty Screen After Login
+
+### Background
+- After successful login, the app was showing an empty screen instead of loading notes
+- The issue occurred during the transition from login screen back to notes screen
+- The app wasn't properly initializing the NotesProvider after authentication
+
+### Implementation Plan
+1. ✅ Improve error handling and logging:
+   - ✅ Added detailed debug logging throughout the authentication flow
+   - ✅ Enhanced error handling in NotesProvider.login() and syncWithServer()
+   - ✅ Added user-friendly error messages with SnackBar notifications
+
+2. ✅ Fix login flow in NotesScreen:
+   - ✅ Added proper loading indicators during API initialization
+   - ✅ Improved error handling when connecting to Nextcloud
+   - ✅ Added better user feedback during the connection process
+
+3. ✅ Enhance LoginScreen:
+   - ✅ Added debug logging to track the authentication flow
+   - ✅ Added a small delay after successful login for better UX
+   - ✅ Improved status messages during the login process
+
+4. ✅ Update main.dart for better initialization:
+   - ✅ Added FutureBuilder to handle the initial loading state
+   - ✅ Implemented proper initialization of NotesProvider on app start
+   - ✅ Added loading indicator while notes are being fetched
+
+5. ✅ Improve state management in NotesProvider:
+   - ✅ Added auto-selection of first note/folder when available
+   - ✅ Enhanced sync process with better error handling
+   - ✅ Added more detailed logging for debugging
+
+### Benefits
+- More reliable login and initialization process
+- Better user experience with appropriate loading indicators
+- Improved error handling and user feedback
+- Fixed the empty screen issue after login
+
+## Current Task: Implement Continuous Note Saving with Debounce
+
+### Background
+- Previously, notes were saved on every keystroke, which is inefficient
+- This could lead to performance issues, especially when syncing with the Nextcloud server
+- A debounce mechanism was needed to reduce the number of save operations
+
+### Implementation Plan
+1. ✅ Add debounce functionality to NoteEditor:
+   - ✅ Added Timer to delay save operations by 5 seconds
+   - ✅ Implemented _saveNote() method with debounce logic
+   - ✅ Added _saveNoteImmediately() method for immediate saves
+   - ✅ Added proper cleanup in dispose() method
+   - ✅ Ensured pending changes are saved when navigating away
+
+### Benefits
+- Reduced number of save operations, improving performance
+- Continuous saving without manual intervention
+- Reduced load on the Nextcloud server by batching changes
+- Preserved user experience while being more efficient
+
+## Future Steps
+- Implement CRUD operations with the Nextcloud API
+- Add offline mode support
+- Improve error handling and user feedback
+- Add support for attachments
+- Add support for other desktop platforms (Windows, Linux)
+- Add visual indicator for unsaved changes
