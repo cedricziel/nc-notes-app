@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/note.dart';
 import '../models/folder.dart';
@@ -104,25 +105,109 @@ class NotesProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Updates a note locally and on the server if authenticated
   Future<void> updateNote(String id, {String? title, String? content}) async {
+    // Find the note in the local collection
     final index = _notes.indexWhere((note) => note.id == id);
-    if (index != -1) {
-      _notes[index] = _notes[index].copyWith(
-        title: title,
-        content: content,
-        updatedAt: DateTime.now(),
-      );
-
-      // Re-sort notes by updated date
-      _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-
-      if (_selectedNote?.id == id) {
-        _selectedNote = _notes[index];
-      }
-
-      await _saveLocalData();
-      notifyListeners();
+    if (index == -1) {
+      debugPrint('Note not found with ID: $id');
+      return;
     }
+
+    // Get the current note
+    final currentNote = _notes[index];
+
+    // Create updated note
+    final updatedNote = currentNote.copyWith(
+      title: title,
+      content: content,
+      updatedAt: DateTime.now(),
+    );
+
+    // Update note in local collection
+    _notes[index] = updatedNote;
+
+    // Re-sort notes by updated date
+    _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+    // Update selected note reference if needed
+    if (_selectedNote?.id == id) {
+      _selectedNote = updatedNote;
+    }
+
+    // Save to local storage
+    await _saveLocalData();
+
+    // If authenticated, try to save to server
+    if (_api != null) {
+      try {
+        debugPrint('Attempting to save note to server: ${updatedNote.title}');
+
+        // Check if this is a server note (has numeric ID) or local-only note
+        if (int.tryParse(id) != null) {
+          // This is a server note, update it
+          final noteId = int.parse(id);
+
+          // Use our custom method to update on server
+          final serverNote = await _updateNoteOnServer(
+            noteId,
+            updatedNote.title,
+            updatedNote.content,
+            updatedNote.folder,
+            updatedNote.favorite ?? false,
+            updatedNote.etag,
+          );
+
+          // Update local note with server etag
+          if (serverNote.etag != null) {
+            _notes[index] = updatedNote.copyWith(etag: serverNote.etag);
+
+            if (_selectedNote?.id == id) {
+              _selectedNote = _notes[index];
+            }
+          }
+
+          debugPrint('Note updated on server successfully');
+        } else {
+          // This is a local-only note, create it on server
+          debugPrint('Creating new note on server');
+
+          // Create note on server
+          final serverNote = await _api!.createNote(
+            title: updatedNote.title,
+            content: updatedNote.content,
+            category: updatedNote.folder,
+            favorite: updatedNote.favorite,
+          );
+
+          // Update local note with server ID and etag
+          _notes[index] = updatedNote.copyWith(
+            id: serverNote.id,
+            etag: serverNote.etag,
+          );
+
+          // Update selected note reference if needed
+          if (_selectedNote?.id == id) {
+            _selectedNote = _notes[index];
+          }
+
+          // Save updated note to local storage
+          await _saveLocalData();
+
+          debugPrint('Note created on server with ID: ${serverNote.id}');
+        }
+      } catch (e) {
+        debugPrint('Error saving note to server: $e');
+        setState(error: 'Failed to save note to server: $e');
+        // We don't rethrow the error because we want the local update to succeed
+        // even if the server update fails
+      }
+    } else {
+      debugPrint('Not authenticated, note saved locally only');
+    }
+
+    // Notify listeners of changes
+    notifyListeners();
   }
 
   Future<void> deleteNote(String id) async {
@@ -325,6 +410,75 @@ class NotesProvider with ChangeNotifier {
       setState(loading: false);
     } catch (e) {
       setState(loading: false, error: 'Logout failed: $e');
+    }
+  }
+
+  /// Fetches a single note from the server by ID
+  Future<Note> _fetchNoteFromServer(int noteId) async {
+    if (_api == null) {
+      throw Exception('Not authenticated');
+    }
+
+    try {
+      return await _api!.getNote(noteId);
+    } catch (e) {
+      debugPrint('Error fetching note from server: $e');
+      throw Exception('Failed to fetch note from server: $e');
+    }
+  }
+
+  /// Helper method to update a note on the server
+  Future<Note> _updateNoteOnServer(
+    int noteId,
+    String title,
+    String content,
+    String? category,
+    bool favorite,
+    String? etag,
+  ) async {
+    if (_api == null) {
+      throw Exception('Not authenticated');
+    }
+
+    try {
+      // First attempt: Try to update with the current etag
+      try {
+        return await _api!.updateNote(
+          id: noteId,
+          title: title,
+          content: content,
+          category: category,
+          favorite: favorite,
+          etag: etag,
+        );
+      } catch (e) {
+        // Check if it's a precondition failed error (412)
+        if (e.toString().contains('Precondition Failed') ||
+            e.toString().contains('412') ||
+            e.toString().contains('precondition failed')) {
+          debugPrint('ETag conflict detected, fetching latest version and retrying...');
+
+          // Fetch the latest version of the note to get the updated etag
+          final serverNote = await _fetchNoteFromServer(noteId);
+
+          // Retry the update with the new etag but our local content
+          debugPrint('Retrying update with new etag: ${serverNote.etag}');
+          return await _api!.updateNote(
+            id: noteId,
+            title: title,
+            content: content,
+            category: category,
+            favorite: favorite,
+            etag: serverNote.etag, // Use the fresh etag from the server
+          );
+        } else {
+          // For other errors, just rethrow
+          rethrow;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error updating note on server: $e');
+      throw Exception('Failed to update note: $e');
     }
   }
 

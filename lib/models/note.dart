@@ -26,6 +26,7 @@ class Note {
         updatedAt = updatedAt ?? DateTime.now();
 
   Note copyWith({
+    String? id,
     String? title,
     String? content,
     DateTime? updatedAt,
@@ -35,7 +36,7 @@ class Note {
     bool? favorite,
   }) {
     return Note(
-      id: id,
+      id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
       createdAt: createdAt,

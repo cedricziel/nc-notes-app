@@ -75,26 +75,52 @@
 - Improved error handling and user feedback
 - Fixed the empty screen issue after login
 
-## Current Task: Implement Continuous Note Saving with Debounce
+## Current Task: Fix ETag Conflict When Saving Notes
 
 ### Background
-- Previously, notes were saved on every keystroke, which is inefficient
-- This could lead to performance issues, especially when syncing with the Nextcloud server
-- A debounce mechanism was needed to reduce the number of save operations
+- Notes were being saved to the server, but sometimes failed with a "Precondition Failed" (412) error
+- This error occurs when the server rejects an update because the note has been modified since it was last retrieved
+- The ETag sent with the update request no longer matched the current ETag on the server
 
 ### Implementation Plan
-1. ✅ Add debounce functionality to NoteEditor:
-   - ✅ Added Timer to delay save operations by 5 seconds
-   - ✅ Implemented _saveNote() method with debounce logic
-   - ✅ Added _saveNoteImmediately() method for immediate saves
-   - ✅ Added proper cleanup in dispose() method
-   - ✅ Ensured pending changes are saved when navigating away
+1. ✅ Implement automatic conflict resolution:
+   - ✅ Added _fetchNoteFromServer() method to get the latest version of a note
+   - ✅ Enhanced _updateNoteOnServer() to detect 412 Precondition Failed errors
+   - ✅ Added retry logic that fetches the latest ETag and retries the update
+
+2. ✅ Improve error handling:
+   - ✅ Added specific error detection for ETag conflicts
+   - ✅ Added detailed logging to track the conflict resolution process
+   - ✅ Maintained local saving even if server saving fails
 
 ### Benefits
-- Reduced number of save operations, improving performance
-- Continuous saving without manual intervention
-- Reduced load on the Nextcloud server by batching changes
-- Preserved user experience while being more efficient
+- Notes now save reliably even when edited from multiple devices
+- Automatic conflict resolution without user intervention
+- Improved error handling with detailed logging
+- Better synchronization between local and server states
+
+## Current Task: Add GitHub Dependabot and GitHub Actions
+
+### Background
+- GitHub Dependabot helps keep dependencies up-to-date by automatically creating pull requests
+- GitHub Actions provides CI/CD capabilities to automate testing, building, and deployment
+
+### Implementation Plan
+1. ✅ Add Dependabot configuration:
+   - ✅ Created `.github/dependabot.yml` to monitor pub dependencies
+   - ✅ Configured weekly updates with appropriate labels and grouping
+   - ✅ Set up commit message formatting for better changelog generation
+
+2. ✅ Set up GitHub Actions workflows:
+   - ✅ Created test workflow to run Flutter tests on each push and PR
+   - ✅ Created build workflow to build iOS and macOS versions
+   - ✅ Created lint workflow to ensure code quality standards
+
+### Benefits
+- Automated dependency updates to keep the project secure and up-to-date
+- Continuous integration to catch issues early
+- Consistent code quality through automated linting
+- Automated builds for multiple platforms
 
 ## Future Steps
 - Implement CRUD operations with the Nextcloud API
@@ -103,3 +129,5 @@
 - Add support for attachments
 - Add support for other desktop platforms (Windows, Linux)
 - Add visual indicator for unsaved changes
+- Expand GitHub Actions to include deployment steps
+- Add code coverage reporting to test workflow
