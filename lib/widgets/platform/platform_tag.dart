@@ -49,8 +49,10 @@ class PlatformTag extends StatelessWidget {
       );
     } else {
       // Use custom Cupertino-styled tag on iOS/macOS
-      final isDarkMode = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-      final defaultTextColor = isDarkMode ? CupertinoColors.white : CupertinoColors.black;
+      final isDarkMode =
+          MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+      final defaultTextColor =
+          isDarkMode ? CupertinoColors.white : CupertinoColors.black;
       final defaultBgColor = isDarkMode
           ? CupertinoColors.systemGrey6.darkColor
           : CupertinoColors.systemGrey6.color;
@@ -58,7 +60,8 @@ class PlatformTag extends StatelessWidget {
       return GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding:
+              padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
             color: backgroundColor ?? defaultBgColor,
             borderRadius: BorderRadius.circular(16),
@@ -69,11 +72,12 @@ class PlatformTag extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: labelStyle ?? TextStyle(
-              color: defaultTextColor,
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
+            style: labelStyle ??
+                TextStyle(
+                  color: defaultTextColor,
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
           ),
         ),
       );

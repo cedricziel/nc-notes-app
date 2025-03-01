@@ -148,12 +148,14 @@ class MyApp extends StatelessWidget {
     final cupertinoTheme = CupertinoThemeData(
       brightness: MediaQuery.platformBrightnessOf(context),
       primaryColor: const Color(0xFF007bff),
-      barBackgroundColor: MediaQuery.platformBrightnessOf(context) == Brightness.dark
-          ? const Color(0xFF2D2D2D)
-          : const Color(0xFFF5F5F5),
-      scaffoldBackgroundColor: MediaQuery.platformBrightnessOf(context) == Brightness.dark
-          ? const Color(0xFF2D2D2D)
-          : const Color(0xFFF5F5F5),
+      barBackgroundColor:
+          MediaQuery.platformBrightnessOf(context) == Brightness.dark
+              ? const Color(0xFF2D2D2D)
+              : const Color(0xFFF5F5F5),
+      scaffoldBackgroundColor:
+          MediaQuery.platformBrightnessOf(context) == Brightness.dark
+              ? const Color(0xFF2D2D2D)
+              : const Color(0xFFF5F5F5),
       textTheme: const CupertinoTextThemeData(
         navTitleTextStyle: TextStyle(
           fontFamily: 'SF Pro Text',

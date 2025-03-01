@@ -146,13 +146,15 @@ Future<bool?> showPlatformConfirmDialog({
     actions: [
       PlatformDialogAction(
         onPressed: () => Navigator.of(context).pop(false),
-        child: Text(cancelText ?? (PlatformService.useCupertino ? 'Cancel' : 'CANCEL')),
+        child: Text(
+            cancelText ?? (PlatformService.useCupertino ? 'Cancel' : 'CANCEL')),
       ),
       PlatformDialogAction(
         onPressed: () => Navigator.of(context).pop(true),
         isDestructiveAction: isDestructive,
         isDefaultAction: !isDestructive,
-        child: Text(confirmText ?? (PlatformService.useCupertino ? 'OK' : 'OK')),
+        child:
+            Text(confirmText ?? (PlatformService.useCupertino ? 'OK' : 'OK')),
       ),
     ],
   );

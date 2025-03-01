@@ -33,9 +33,10 @@ class PlatformIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final iconColor = color ?? (PlatformService.useCupertino
-        ? CupertinoColors.activeBlue.resolveFrom(context)
-        : theme.iconTheme.color);
+    final iconColor = color ??
+        (PlatformService.useCupertino
+            ? CupertinoColors.activeBlue.resolveFrom(context)
+            : theme.iconTheme.color);
 
     if (PlatformService.useCupertino) {
       // iOS-style icon button

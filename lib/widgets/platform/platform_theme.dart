@@ -154,7 +154,8 @@ class PlatformTheme {
   }
 
   /// Returns the edge insets for the current platform.
-  static EdgeInsets padding({double horizontal = 16.0, double vertical = 16.0}) {
+  static EdgeInsets padding(
+      {double horizontal = 16.0, double vertical = 16.0}) {
     return EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical);
   }
 
@@ -163,7 +164,8 @@ class PlatformTheme {
     if (PlatformService.useCupertino) {
       return [
         BoxShadow(
-          color: CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
+          color:
+              CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
           blurRadius: 5.0,
           offset: const Offset(0, 2),
         ),

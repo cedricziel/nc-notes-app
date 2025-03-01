@@ -25,9 +25,8 @@ class PlatformBottomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final defaultBgColor = isDarkMode
-        ? const Color(0xFF2D2D2D)
-        : const Color(0xFFF5F5F5);
+    final defaultBgColor =
+        isDarkMode ? const Color(0xFF2D2D2D) : const Color(0xFFF5F5F5);
 
     if (!PlatformService.useCupertino) {
       // Android-style bottom app bar
@@ -44,7 +43,9 @@ class PlatformBottomAppBar extends StatelessWidget {
           color: backgroundColor ?? defaultBgColor,
           border: Border(
             top: BorderSide(
-              color: isDarkMode ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0),
+              color: isDarkMode
+                  ? const Color(0xFF3D3D3D)
+                  : const Color(0xFFE0E0E0),
               width: 0.5,
             ),
           ),

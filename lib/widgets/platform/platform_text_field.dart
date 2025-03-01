@@ -87,9 +87,10 @@ class PlatformTextField extends StatelessWidget {
           focusNode: focusNode,
           placeholder: placeholder,
           style: style,
-          placeholderStyle: placeholderStyle ?? TextStyle(
-            color: CupertinoColors.placeholderText.resolveFrom(context),
-          ),
+          placeholderStyle: placeholderStyle ??
+              TextStyle(
+                color: CupertinoColors.placeholderText.resolveFrom(context),
+              ),
           keyboardType: keyboardType,
           obscureText: obscureText,
           enabled: enabled,
@@ -118,11 +119,12 @@ class PlatformTextField extends StatelessWidget {
         child: TextField(
           controller: controller,
           focusNode: focusNode,
-          decoration: decoration ?? InputDecoration(
-            hintText: placeholder,
-            hintStyle: placeholderStyle,
-            border: const OutlineInputBorder(),
-          ),
+          decoration: decoration ??
+              InputDecoration(
+                hintText: placeholder,
+                hintStyle: placeholderStyle,
+                border: const OutlineInputBorder(),
+              ),
           style: style,
           keyboardType: keyboardType,
           obscureText: obscureText,

@@ -221,9 +221,10 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
               focusNode: _focusNode,
               maxLines: null,
               // Use iOS keyboard appearance on iOS
-              keyboardAppearance: Theme.of(context).brightness == Brightness.dark
-                  ? Brightness.dark
-                  : Brightness.light,
+              keyboardAppearance:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Brightness.dark
+                      : Brightness.light,
               // Enable scrolling physics for the text field
               scrollPhysics: Theme.of(context).platform == TargetPlatform.iOS
                   ? const BouncingScrollPhysics()
