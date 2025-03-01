@@ -321,7 +321,7 @@ class FoldersSidebar extends StatelessWidget {
           : (isSelected
               ? const Color(0xFFE5E5E5).withOpacity(0.7)
               : const Color(0xFFE5E5E5)),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: -2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     );
   }
 

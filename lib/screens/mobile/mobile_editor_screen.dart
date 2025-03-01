@@ -5,13 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import '../../models/note.dart';
 import '../../providers/notes_provider.dart';
 import '../../widgets/unified_markdown_editor.dart';
 import '../../widgets/sync_indicator.dart';
 import '../../widgets/platform/platform_scaffold.dart';
 import '../../widgets/platform/platform_app_bar.dart';
-import '../../widgets/platform/platform_bottom_app_bar.dart';
 import '../../widgets/platform/platform_service.dart';
 import '../../widgets/platform/platform_list_tile.dart';
 import '../../widgets/platform/platform_text_field.dart';
@@ -338,7 +338,7 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
     if (_note == null) {
       // Loading state
       return PlatformScaffold(
-        appBar: const PlatformAppBar(
+        appBar: PlatformAppBar(
           title: Text('Loading...'),
         ),
         body: Center(
@@ -519,12 +519,14 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
       appBar: PlatformAppBar(
         title: Text(title),
         backgroundColor: backgroundColor,
-        actions: appBarActions,
+        trailingActions: appBarActions,
       ),
       body: editorContent,
-      bottomNavigationBar: PlatformBottomAppBar(
-        backgroundColor: backgroundColor,
-        child: formattingToolbar,
+      material: (_, __) => fpw.MaterialScaffoldData(
+        bottomNavBar: Material(
+          color: backgroundColor,
+          child: formattingToolbar,
+        ),
       ),
     );
   }

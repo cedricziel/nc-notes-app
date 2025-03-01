@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import '../../models/note.dart';
 import '../../providers/notes_provider.dart';
 import '../../widgets/sync_indicator.dart';
@@ -83,67 +85,71 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
         final oldestNotes =
             notes.where((note) => note.updatedAt.isBefore(last30Days)).toList();
 
-        return PlatformScaffold(
-          backgroundColor: backgroundColor,
-          appBar: PlatformAppBar(
-            title: Text(title),
-            backgroundColor: backgroundColor,
-            actions: [
-              // Sync indicator
-              Consumer<NotesProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading || provider.isSaving) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: SyncIndicator(),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ],
-          ),
-          body: notes.isEmpty
-              ? const Center(
-                  child: Text('No notes yet'),
-                )
-              : ListView(
-                  children: [
-                    if (recentNotes.isNotEmpty) ...[
-                      _buildSectionHeader(context, 'Last 7 Days'),
-                      ...recentNotes
-                          .map((note) => _buildNoteItem(context, note)),
-                    ],
-                    if (olderNotes.isNotEmpty) ...[
-                      _buildSectionHeader(context, 'Last 30 Days'),
-                      ...olderNotes
-                          .map((note) => _buildNoteItem(context, note)),
-                    ],
-                    if (oldestNotes.isNotEmpty) ...[
-                      _buildSectionHeader(context, 'Older'),
-                      ...oldestNotes
-                          .map((note) => _buildNoteItem(context, note)),
-                    ],
+        final notesListView = notes.isEmpty
+            ? const Center(
+                child: Text('No notes yet'),
+              )
+            : ListView(
+                children: [
+                  if (recentNotes.isNotEmpty) ...[
+                    _buildSectionHeader(context, 'Last 7 Days'),
+                    ...recentNotes.map((note) => _buildNoteItem(context, note)),
                   ],
-                ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () async {
-              // Create a new note
-              await notesProvider.addNote();
+                  if (olderNotes.isNotEmpty) ...[
+                    _buildSectionHeader(context, 'Last 30 Days'),
+                    ...olderNotes.map((note) => _buildNoteItem(context, note)),
+                  ],
+                  if (oldestNotes.isNotEmpty) ...[
+                    _buildSectionHeader(context, 'Older'),
+                    ...oldestNotes.map((note) => _buildNoteItem(context, note)),
+                  ],
+                ],
+              );
 
-              // Navigate to the editor for the new note
-              if (notesProvider.selectedNote != null && mounted) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MobileEditorScreen(
-                      noteId: notesProvider.selectedNote!.id,
-                    ),
+        final fab = FloatingActionButton(
+          onPressed: () async {
+            // Create a new note
+            await notesProvider.addNote();
+
+            // Navigate to the editor for the new note
+            if (notesProvider.selectedNote != null && mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MobileEditorScreen(
+                    noteId: notesProvider.selectedNote!.id,
                   ),
-                );
-              }
-            },
-            child: const Icon(Icons.add),
+                ),
+              );
+            }
+          },
+          child: const Icon(Icons.add),
+        );
+
+        final syncIndicator = Consumer<NotesProvider>(
+          builder: (context, provider, child) {
+            if (provider.isLoading || provider.isSaving) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: SyncIndicator(),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        );
+
+        final platformAppBar = PlatformAppBar(
+          title: Text(title),
+          backgroundColor: backgroundColor,
+          trailingActions: [syncIndicator],
+        );
+
+        return fpw.PlatformScaffold(
+          backgroundColor: backgroundColor,
+          appBar: platformAppBar,
+          body: notesListView,
+          material: (_, __) => fpw.MaterialScaffoldData(
+            floatingActionButton: fab,
           ),
         );
       },

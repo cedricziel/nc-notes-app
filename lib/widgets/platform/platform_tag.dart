@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'platform_service.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 /// A platform-aware tag widget that uses either a Material [Chip]
 /// or a Cupertino-styled tag based on the platform.
@@ -35,7 +35,7 @@ class PlatformTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!PlatformService.useCupertino) {
+    if (!isCupertino(context)) {
       // Use Material Chip on non-iOS/macOS platforms
       // Wrap in Material to provide MaterialLocalizations
       return Material(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import '../../providers/notes_provider.dart';
 import '../../models/folder.dart';
 import '../responsive_notes_layout.dart';
@@ -8,7 +9,6 @@ import '../../widgets/sync_indicator.dart';
 import '../../widgets/platform/platform_tag.dart';
 import '../../widgets/platform/platform_scaffold.dart';
 import '../../widgets/platform/platform_app_bar.dart';
-import '../../widgets/platform/platform_bottom_app_bar.dart';
 import '../../widgets/platform/platform_list_tile.dart';
 import '../../widgets/platform/platform_text_field.dart';
 import '../../widgets/platform/platform_button.dart';
@@ -31,7 +31,7 @@ class MobileFoldersScreen extends StatelessWidget {
           appBar: PlatformAppBar(
             title: const Text('Nextcloud Notes'),
             backgroundColor: backgroundColor,
-            actions: [
+            trailingActions: [
               // Sync button with animated indicator
               Consumer<NotesProvider>(
                 builder: (context, provider, child) {
@@ -159,85 +159,89 @@ class MobileFoldersScreen extends StatelessWidget {
               const SizedBox(height: 20),
             ],
           ),
-          bottomNavigationBar: PlatformBottomAppBar(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    notesProvider.isAuthenticated ? Icons.logout : Icons.login,
-                  ),
-                  tooltip: notesProvider.isAuthenticated
-                      ? 'Logout'
-                      : 'Login to Nextcloud',
-                  onPressed: () async {
-                    if (notesProvider.isAuthenticated) {
-                      // Logout
-                      await notesProvider.logout();
+          material: (_, __) => fpw.MaterialScaffoldData(
+            bottomNavBar: Material(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      notesProvider.isAuthenticated
+                          ? Icons.logout
+                          : Icons.login,
+                    ),
+                    tooltip: notesProvider.isAuthenticated
+                        ? 'Logout'
+                        : 'Login to Nextcloud',
+                    onPressed: () async {
+                      if (notesProvider.isAuthenticated) {
+                        // Logout
+                        await notesProvider.logout();
 
-                      // Show success message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Logged out successfully')),
-                      );
-
-                      // Navigate to login screen, replacing the current screen
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
-                      );
-                    } else {
-                      // Navigate to login screen
-                      final result = await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
-
-                      if (result == true) {
-                        // Login successful, initialize API
+                        // Show success message
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text(
-                                  'Initializing connection to Nextcloud...')),
+                              content: Text('Logged out successfully')),
                         );
 
-                        // Show loading indicator
-                        notesProvider.setState(loading: true);
+                        // Navigate to login screen, replacing the current screen
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                              builder: (context) => const LoginScreen()),
+                        );
+                      } else {
+                        // Navigate to login screen
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
 
-                        try {
-                          final success = await notesProvider.login();
-                          if (success) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      'Connected to Nextcloud successfully!')),
-                            );
-                          } else {
+                        if (result == true) {
+                          // Login successful, initialize API
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Initializing connection to Nextcloud...')),
+                          );
+
+                          // Show loading indicator
+                          notesProvider.setState(loading: true);
+
+                          try {
+                            final success = await notesProvider.login();
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Connected to Nextcloud successfully!')),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Error: ${notesProvider.errorMessage ?? "Unknown error"}')),
+                              );
+                            }
+                          } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                   content: Text(
-                                      'Error: ${notesProvider.errorMessage ?? "Unknown error"}')),
+                                      'Error connecting to Nextcloud: $e')),
                             );
+                            notesProvider.setState(loading: false);
                           }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content:
-                                    Text('Error connecting to Nextcloud: $e')),
-                          );
-                          notesProvider.setState(loading: false);
                         }
                       }
-                    }
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.create_new_folder_outlined),
-                  tooltip: 'Add Folder',
-                  onPressed: () => _showAddFolderDialog(context),
-                ),
-              ],
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.create_new_folder_outlined),
+                    tooltip: 'Add Folder',
+                    onPressed: () => _showAddFolderDialog(context),
+                  ),
+                ],
+              ),
             ),
           ),
         );

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'providers/notes_provider.dart';
 import 'screens/responsive_notes_layout.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
-import 'widgets/platform/platform_app.dart';
 import 'widgets/platform/platform_service.dart';
 import 'widgets/platform/platform_theme.dart';
 
@@ -224,13 +224,28 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => NotesProvider()),
         ChangeNotifierProvider(create: (context) => MobileNavigationProvider()),
       ],
-      child: PlatformApp(
-        title: 'Flutter Notes',
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        cupertinoTheme: cupertinoTheme,
-        debugShowCheckedModeBanner: false,
-        home: homeWidget,
+      child: PlatformProvider(
+        settings: PlatformSettingsData(
+          // Use the platform detection from flutter_platform_widgets
+          platformStyle: PlatformStyleData(
+            ios: PlatformStyle.Cupertino,
+            android: PlatformStyle.Material,
+            macos: PlatformStyle.Cupertino,
+          ),
+        ),
+        builder: (context) => PlatformApp(
+          title: 'Flutter Notes',
+          material: (_, __) => MaterialAppData(
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            debugShowCheckedModeBanner: false,
+          ),
+          cupertino: (_, __) => CupertinoAppData(
+            theme: cupertinoTheme,
+            debugShowCheckedModeBanner: false,
+          ),
+          home: homeWidget,
+        ),
       ),
     );
   }

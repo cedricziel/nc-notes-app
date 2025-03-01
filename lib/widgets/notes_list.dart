@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import 'sync_indicator.dart';
@@ -41,7 +42,7 @@ class NotesList extends StatelessWidget {
           appBar: PlatformAppBar(
             backgroundColor: backgroundColor,
             title: null, // Explicitly set title to null to remove it
-            actions: [
+            trailingActions: [
               // List/Grid view toggle
               IconButton(
                 icon: const Icon(Icons.view_list, size: 18),

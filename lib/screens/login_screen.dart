@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final bool isMacOS = PlatformService.isMacOS;
 
     return PlatformScaffold(
-      appBar: const PlatformAppBar(
+      appBar: PlatformAppBar(
         title: Text('Login to Nextcloud'),
       ),
       body: Padding(

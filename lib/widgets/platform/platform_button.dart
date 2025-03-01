@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'platform_service.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+
+/// This file re-exports the PlatformElevatedButton and PlatformTextButton from flutter_platform_widgets.
+///
+/// We're using the package's implementation directly instead of our custom implementation.
+/// For usage information, see the flutter_platform_widgets documentation.
+export 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    show PlatformElevatedButton, PlatformTextButton;
 
 /// A platform-aware button widget that uses either a [CupertinoButton]
 /// or a Material button based on the platform.
+///
+/// This is a wrapper around flutter_platform_widgets' PlatformElevatedButton and PlatformTextButton
+/// that provides a similar API to our custom PlatformButton implementation.
 class PlatformButton extends StatelessWidget {
   /// The callback that is called when the button is tapped.
   final VoidCallback? onPressed;
@@ -55,41 +64,35 @@ class PlatformButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    if (PlatformService.useCupertino) {
-      // iOS-style button
-      return filled
-          ? CupertinoButton.filled(
-              onPressed: onPressed,
-              padding: padding,
-              child: child,
-            )
-          : CupertinoButton(
-              onPressed: onPressed,
-              padding: padding,
-              color: color,
-              child: child,
-            );
+    if (filled) {
+      return PlatformElevatedButton(
+        onPressed: onPressed,
+        material: (_, __) => MaterialElevatedButtonData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            padding: padding,
+          ),
+        ),
+        cupertino: (_, __) => CupertinoElevatedButtonData(
+          padding: padding,
+          color: color,
+        ),
+        child: child,
+      );
     } else {
-      // Android-style button
-      return filled
-          ? ElevatedButton(
-              onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                padding: padding,
-              ),
-              child: child,
-            )
-          : TextButton(
-              onPressed: onPressed,
-              style: TextButton.styleFrom(
-                foregroundColor: color ?? theme.primaryColor,
-                padding: padding,
-              ),
-              child: child,
-            );
+      return PlatformTextButton(
+        onPressed: onPressed,
+        material: (_, __) => MaterialTextButtonData(
+          style: TextButton.styleFrom(
+            foregroundColor: color,
+            padding: padding,
+          ),
+        ),
+        cupertino: (_, __) => CupertinoTextButtonData(
+          padding: padding,
+        ),
+        child: child,
+      );
     }
   }
 }

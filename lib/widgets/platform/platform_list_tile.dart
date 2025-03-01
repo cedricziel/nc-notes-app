@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import 'platform_service.dart';
 
 /// A platform-aware list tile widget that uses either a [CupertinoListTile]
 /// or a [ListTile] based on the platform.
+///
+/// This is a wrapper around flutter_platform_widgets' PlatformListTile that
+/// adds support for additional parameters like contentPadding, minLeadingWidth,
+/// dense, visualDensity, selected, selectedTileColor, and onLongPress.
 class PlatformListTile extends StatelessWidget {
   /// The primary content of the list tile.
   final Widget? title;
@@ -17,98 +22,81 @@ class PlatformListTile extends StatelessWidget {
   /// Additional content displayed below the title.
   final Widget? subtitle;
 
-  /// Whether this list tile is selected.
-  final bool? selected;
-
-  /// The tile's background color.
-  final Color? backgroundColor;
-
-  /// The tile's background color when selected.
-  final Color? selectedTileColor;
-
   /// Called when the user taps this list tile.
   final VoidCallback? onTap;
 
-  /// Called when the user long-presses this list tile.
+  /// Called when the user long-presses on this list tile.
   final VoidCallback? onLongPress;
 
-  /// Whether this list tile is interactive.
-  final bool enabled;
+  /// Whether this list tile is selected.
+  final bool? selected;
 
-  /// Whether the list tile is dense.
-  final bool? dense;
+  /// The color to use for the background of this list tile when selected.
+  final Color? selectedTileColor;
 
   /// The padding around the content of the list tile.
   final EdgeInsetsGeometry? contentPadding;
 
+  /// Whether to use a dense layout.
+  final bool? dense;
+
+  /// Defines how compact the list tile's layout will be.
+  final VisualDensity? visualDensity;
+
   /// The minimum width allocated for the leading widget.
   final double? minLeadingWidth;
 
-  /// The visual density of the list tile.
-  final VisualDensity? visualDensity;
-
   /// Creates a platform-aware list tile.
   const PlatformListTile({
-    super.key,
+    Key? key,
     this.title,
     this.leading,
     this.trailing,
     this.subtitle,
-    this.selected,
-    this.backgroundColor,
-    this.selectedTileColor,
     this.onTap,
     this.onLongPress,
-    this.enabled = true,
-    this.dense,
+    this.selected,
+    this.selectedTileColor,
     this.contentPadding,
-    this.minLeadingWidth,
+    this.dense,
     this.visualDensity,
-  });
+    this.minLeadingWidth,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (!PlatformService.useCupertino) {
-      // Android-style list tile
-      // Wrap in Material to provide MaterialLocalizations
-      return Material(
-        // Use transparent type to not affect the visual appearance
-        type: MaterialType.transparency,
-        child: ListTile(
-          title: title,
-          leading: leading,
-          trailing: trailing,
-          subtitle: subtitle,
-          selected: selected ?? false,
-          tileColor: backgroundColor,
-          selectedTileColor: selectedTileColor,
-          onTap: onTap,
-          onLongPress: onLongPress,
-          enabled: enabled,
-          dense: dense,
-          contentPadding: contentPadding,
-          minLeadingWidth: minLeadingWidth,
-          visualDensity: visualDensity,
-        ),
-      );
-    } else {
+    if (PlatformService.useCupertino) {
       // iOS-style list tile
-      // CupertinoListTile requires non-nullable title
-      final Widget titleWidget = title ?? const SizedBox.shrink();
-
       return CupertinoListTile(
-        title: titleWidget,
+        title: title ?? const SizedBox.shrink(),
         leading: leading,
         trailing: trailing,
         subtitle: subtitle,
-        backgroundColor: backgroundColor,
-        onTap: enabled ? onTap : null,
+        onTap: onTap,
         padding: contentPadding,
-        // Note: CupertinoListTile doesn't have all the same properties as ListTile
-        // We'll handle some of them manually
-        additionalInfo: selected == true
-            ? const Icon(CupertinoIcons.check_mark, size: 16)
+        backgroundColor: selected == true ? selectedTileColor : null,
+        additionalInfo: onLongPress != null
+            ? GestureDetector(
+                onLongPress: onLongPress,
+                child: const SizedBox.shrink(),
+              )
             : null,
+      );
+    } else {
+      // Android-style list tile
+      return ListTile(
+        title: title,
+        leading: leading,
+        trailing: trailing,
+        subtitle: subtitle,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        selected: selected ?? false,
+        selectedTileColor: selectedTileColor,
+        contentPadding: contentPadding,
+        dense: dense,
+        visualDensity: visualDensity,
+        minLeadingWidth: minLeadingWidth,
       );
     }
   }
