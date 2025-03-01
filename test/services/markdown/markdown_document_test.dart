@@ -380,7 +380,7 @@ void main() {
         const markdown = '# Heading\n\n> Quote\n\n- List item\n\n1. Ordered item\n\n| Cell 1 | Cell 2 |\n| --- | --- |\n| Data 1 | Data 2 |\n\n```javascript\nconst x = 5;\n```\n\n:::info\nInfo block\n:::\n\nRegular paragraph';
         final document = MarkdownDocument.fromMarkdown(markdown);
 
-        expect(document.blocks.length, equals(7));
+        expect(document.blocks.length, equals(8));
         expect(document.blocks[0], isA<HeadingBlock>());
         expect(document.blocks[1], isA<ParagraphBlock>()); // Quote is treated as paragraph
         expect(document.blocks[2], isA<ParagraphBlock>()); // List is treated as paragraph
@@ -388,6 +388,7 @@ void main() {
         expect(document.blocks[4], isA<TableBlock>());
         expect(document.blocks[5], isA<CodeBlock>());
         expect(document.blocks[6], isA<AdmonitionBlock>());
+        expect(document.blocks[7], isA<ParagraphBlock>()); // Regular paragraph
       });
     });
   });
