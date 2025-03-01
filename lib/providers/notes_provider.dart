@@ -47,7 +47,9 @@ class NotesProvider with ChangeNotifier {
 
   List<Note> get filteredNotes {
     if (_selectedFolder != null) {
-      return _notes.where((note) => note.folder == _selectedFolder!.id).toList();
+      return _notes
+          .where((note) => note.folder == _selectedFolder!.id)
+          .toList();
     } else if (_selectedTag != null) {
       return _notes.where((note) => note.tags.contains(_selectedTag)).toList();
     }
@@ -79,9 +81,8 @@ class NotesProvider with ChangeNotifier {
 
     // Load notes
     final notesJson = prefs.getStringList('notes') ?? [];
-    _notes = notesJson
-        .map((noteStr) => Note.fromJson(jsonDecode(noteStr)))
-        .toList();
+    _notes =
+        notesJson.map((noteStr) => Note.fromJson(jsonDecode(noteStr))).toList();
 
     // Sort notes by updated date (newest first)
     _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
@@ -93,15 +94,12 @@ class NotesProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
 
     // Save folders
-    final foldersJson = _folders
-        .map((folder) => jsonEncode(folder.toJson()))
-        .toList();
+    final foldersJson =
+        _folders.map((folder) => jsonEncode(folder.toJson())).toList();
     await prefs.setStringList('folders', foldersJson);
 
     // Save notes
-    final notesJson = _notes
-        .map((note) => jsonEncode(note.toJson()))
-        .toList();
+    final notesJson = _notes.map((note) => jsonEncode(note.toJson())).toList();
     await prefs.setStringList('notes', notesJson);
   }
 
@@ -578,12 +576,16 @@ class NotesProvider with ChangeNotifier {
 
       // Check for local notes that need to be preserved
       // (notes that haven't been synced to the server yet)
-      final localOnlyNotes = _notes.where((note) =>
-        int.tryParse(note.id) == null // Local notes have non-numeric IDs
-      ).toList();
+      final localOnlyNotes = _notes
+          .where((note) =>
+                  int.tryParse(note.id) ==
+                  null // Local notes have non-numeric IDs
+              )
+          .toList();
 
       if (localOnlyNotes.isNotEmpty) {
-        debugPrint('Found ${localOnlyNotes.length} local-only notes to preserve');
+        debugPrint(
+            'Found ${localOnlyNotes.length} local-only notes to preserve');
       }
 
       // Update local notes with server notes, ensuring each has a reference copy
@@ -610,23 +612,20 @@ class NotesProvider with ChangeNotifier {
       debugPrint('Found ${folderNames.length} folders in notes');
 
       // Create folder objects
-      _folders = folderNames.map((name) =>
-        _folders.firstWhere(
-          (folder) => folder.id == name,
-          orElse: () => Folder(name: name, id: name)
-        )
-      ).toList();
+      _folders = folderNames
+          .map((name) => _folders.firstWhere((folder) => folder.id == name,
+              orElse: () => Folder(name: name, id: name)))
+          .toList();
 
       // Update selected note reference if needed
       if (_selectedNote != null) {
         final selectedId = _selectedNote!.id;
-        final updatedNote = _notes.firstWhere(
-          (note) => note.id == selectedId,
-          orElse: () => _notes.isNotEmpty ? _notes.first : _selectedNote!
-        );
+        final updatedNote = _notes.firstWhere((note) => note.id == selectedId,
+            orElse: () => _notes.isNotEmpty ? _notes.first : _selectedNote!);
 
         if (updatedNote.id != selectedId) {
-          debugPrint('Previously selected note not found, selecting a different note');
+          debugPrint(
+              'Previously selected note not found, selecting a different note');
         }
 
         _selectedNote = updatedNote;
@@ -639,12 +638,13 @@ class NotesProvider with ChangeNotifier {
       if (_selectedFolder != null) {
         final selectedId = _selectedFolder!.id;
         final updatedFolder = _folders.firstWhere(
-          (folder) => folder.id == selectedId,
-          orElse: () => _folders.isNotEmpty ? _folders.first : _selectedFolder!
-        );
+            (folder) => folder.id == selectedId,
+            orElse: () =>
+                _folders.isNotEmpty ? _folders.first : _selectedFolder!);
 
         if (updatedFolder.id != selectedId) {
-          debugPrint('Previously selected folder not found, selecting a different folder');
+          debugPrint(
+              'Previously selected folder not found, selecting a different folder');
         }
 
         _selectedFolder = updatedFolder;
@@ -807,7 +807,6 @@ class NotesProvider with ChangeNotifier {
       if (e.toString().contains('Precondition Failed') ||
           e.toString().contains('412') ||
           e.toString().contains('precondition failed')) {
-
         debugPrint('ETag conflict detected, attempting to resolve...');
 
         // Fetch the latest version of the note from the server
@@ -816,7 +815,8 @@ class NotesProvider with ChangeNotifier {
         // Implement TypeScript-like conflict resolution
         if (serverNote.content == content) {
           // Content is already up-to-date, just update with server's metadata
-          debugPrint('Content is already up-to-date on server, updating metadata');
+          debugPrint(
+              'Content is already up-to-date on server, updating metadata');
 
           // Update the note with server's etag but keep our content
           final resolvedNote = note.copyWith(
@@ -837,9 +837,11 @@ class NotesProvider with ChangeNotifier {
           await _saveLocalData();
 
           return serverNote;
-        } else if (reference != null && serverNote.content == reference.content) {
+        } else if (reference != null &&
+            serverNote.content == reference.content) {
           // Remote content has not changed from our reference, retry with new etag
-          debugPrint('Server content has not changed, retrying update with new etag');
+          debugPrint(
+              'Server content has not changed, retrying update with new etag');
 
           // Retry the update with the new etag
           return await _api!.updateNote(

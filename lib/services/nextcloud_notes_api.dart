@@ -50,11 +50,14 @@ class NextcloudNotesApi {
       case 201:
         return; // Success
       case 400:
-        throw NextcloudApiException('Bad Request: Invalid ID or parameters', statusCode: 400);
+        throw NextcloudApiException('Bad Request: Invalid ID or parameters',
+            statusCode: 400);
       case 401:
-        throw NextcloudApiException('Unauthorized: Invalid credentials', statusCode: 401);
+        throw NextcloudApiException('Unauthorized: Invalid credentials',
+            statusCode: 401);
       case 403:
-        throw NextcloudApiException('Forbidden: Note is read-only', statusCode: 403);
+        throw NextcloudApiException('Forbidden: Note is read-only',
+            statusCode: 403);
       case 412:
         throw NextcloudApiException(
           'Precondition Failed: Note has been modified on the server',
@@ -105,7 +108,8 @@ class NextcloudNotesApi {
     }
 
     // Build URI with query parameters
-    final uri = Uri.parse('${config.apiUrl}/notes').replace(queryParameters: queryParams);
+    final uri = Uri.parse('${config.apiUrl}/notes')
+        .replace(queryParameters: queryParams);
 
     // Make the request
     final response = await _client.get(
@@ -121,11 +125,14 @@ class NextcloudNotesApi {
 
     // Parse the response
     final List<dynamic> jsonList = json.decode(response.body);
-    final notes = jsonList.map((json) => _convertApiNoteToAppNote(json)).toList();
+    final notes =
+        jsonList.map((json) => _convertApiNoteToAppNote(json)).toList();
 
     // Log ETags for debugging
     print('Fetched ${notes.length} notes from server');
-    int notesWithEtag = notes.where((note) => note.etag != null && note.etag!.isNotEmpty).length;
+    int notesWithEtag = notes
+        .where((note) => note.etag != null && note.etag!.isNotEmpty)
+        .length;
     print('$notesWithEtag/${notes.length} notes have valid ETags');
 
     if (notesWithEtag < notes.length) {
@@ -229,7 +236,8 @@ class NextcloudNotesApi {
     }
 
     final createdNote = _convertApiNoteToAppNote(jsonMap);
-    print('Note created successfully, ID: ${createdNote.id}, ETag: ${createdNote.etag}');
+    print(
+        'Note created successfully, ID: ${createdNote.id}, ETag: ${createdNote.etag}');
 
     return createdNote;
   }
@@ -276,9 +284,8 @@ class NextcloudNotesApi {
     // Note: The ETag must be wrapped in double quotes as per the TypeScript implementation
     if (etag != null && etag.isNotEmpty) {
       // Ensure the ETag is properly quoted (add quotes if not already present)
-      final quotedEtag = etag.startsWith('"') && etag.endsWith('"')
-          ? etag
-          : '"$etag"';
+      final quotedEtag =
+          etag.startsWith('"') && etag.endsWith('"') ? etag : '"$etag"';
       print('Adding If-Match header with ETag: $quotedEtag');
       headers['If-Match'] = quotedEtag;
     } else {
@@ -346,7 +353,8 @@ class NextcloudNotesApi {
   }
 
   /// Updates the server settings
-  Future<Map<String, dynamic>> updateSettings(Map<String, dynamic> settings) async {
+  Future<Map<String, dynamic>> updateSettings(
+      Map<String, dynamic> settings) async {
     final response = await _client.put(
       Uri.parse('${config.apiUrl}/settings'),
       headers: {
@@ -366,12 +374,14 @@ class NextcloudNotesApi {
   Note _convertApiNoteToAppNote(Map<String, dynamic> apiNote) {
     // Extract the folder from the category
     String? folder;
-    if (apiNote['category'] != null && apiNote['category'].toString().isNotEmpty) {
+    if (apiNote['category'] != null &&
+        apiNote['category'].toString().isNotEmpty) {
       folder = apiNote['category'];
     }
 
     // Convert timestamps
-    final DateTime createdAt = DateTime.now(); // API doesn't provide creation time
+    final DateTime createdAt =
+        DateTime.now(); // API doesn't provide creation time
     final DateTime updatedAt = apiNote['modified'] != null
         ? DateTime.fromMillisecondsSinceEpoch(apiNote['modified'] * 1000)
         : DateTime.now();

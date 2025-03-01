@@ -58,7 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
       final success = await _nextcloudAuthService.login(
         serverUrl: _serverController.text,
         onCredentialsReceived: (serverUrl, username, password) {
-          debugPrint('Credentials received for server: $serverUrl, username: $username');
+          debugPrint(
+              'Credentials received for server: $serverUrl, username: $username');
           setState(() {
             _statusMessage = 'Login successful! Returning to app...';
           });
@@ -116,7 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
         title: const Text('Login to Nextcloud'),
       ),
       body: Padding(
-        padding: isMacOS ? const EdgeInsets.all(24.0) : const EdgeInsets.all(16.0),
+        padding:
+            isMacOS ? const EdgeInsets.all(24.0) : const EdgeInsets.all(16.0),
         child: _buildLoginForm(isMacOS),
       ),
     );
@@ -130,9 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(
           'Enter your Nextcloud server address',
           style: TextStyle(
-            fontSize: isMacOS ? 22 : 18,
-            fontWeight: FontWeight.bold
-          ),
+              fontSize: isMacOS ? 22 : 18, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
@@ -166,9 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
         SizedBox(
           width: isMacOS ? 200 : double.infinity,
           child: ElevatedButton.icon(
-            onPressed: (_hasServerUrl && !_isLoading)
-                ? _startLoginFlow
-                : null,
+            onPressed: (_hasServerUrl && !_isLoading) ? _startLoginFlow : null,
             icon: const Icon(Icons.login),
             label: const Text('Login with Browser'),
           ),

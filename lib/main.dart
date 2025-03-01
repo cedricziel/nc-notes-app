@@ -13,7 +13,8 @@ void main() async {
   final authService = AuthService();
   final isAuthenticated = await authService.isAuthenticated();
 
-  debugPrint('Starting app with authentication state: ${isAuthenticated ? 'authenticated' : 'not authenticated'}');
+  debugPrint(
+      'Starting app with authentication state: ${isAuthenticated ? 'authenticated' : 'not authenticated'}');
 
   runApp(MyApp(isAuthenticated: isAuthenticated));
 }
@@ -34,7 +35,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFFFFD700), // Gold accent color
             brightness: Brightness.light,
-            background: const Color(0xFFF5F5F5), // Light gray background like in screenshot
+            background: const Color(
+                0xFFF5F5F5), // Light gray background like in screenshot
             surface: const Color(0xFFF5F5F5),
             onSurface: Colors.black87,
             primary: const Color(0xFF007bff), // Blue for selected items
@@ -98,38 +100,39 @@ class MyApp extends StatelessWidget {
         ),
         themeMode: ThemeMode.system,
         home: isAuthenticated
-          ? FutureBuilder(
-              // Initialize the NotesProvider when the app starts with authentication
-              future: Future.delayed(Duration.zero, () async {
-                final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-                if (!notesProvider.isAuthenticated) {
-                  debugPrint('Auto-initializing NotesProvider on app start');
-                  await notesProvider.login();
-                }
-                return true;
-              }),
-              builder: (context, snapshot) {
-                // Show loading indicator while initializing
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Scaffold(
-                    body: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text('Loading your notes...'),
-                        ],
+            ? FutureBuilder(
+                // Initialize the NotesProvider when the app starts with authentication
+                future: Future.delayed(Duration.zero, () async {
+                  final notesProvider =
+                      Provider.of<NotesProvider>(context, listen: false);
+                  if (!notesProvider.isAuthenticated) {
+                    debugPrint('Auto-initializing NotesProvider on app start');
+                    await notesProvider.login();
+                  }
+                  return true;
+                }),
+                builder: (context, snapshot) {
+                  // Show loading indicator while initializing
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Scaffold(
+                      body: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Loading your notes...'),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }
+                    );
+                  }
 
-                // Show the notes screen once initialized
-                return const NotesScreen();
-              },
-            )
-          : const LoginScreen(),
+                  // Show the notes screen once initialized
+                  return const NotesScreen();
+                },
+              )
+            : const LoginScreen(),
       ),
     );
   }

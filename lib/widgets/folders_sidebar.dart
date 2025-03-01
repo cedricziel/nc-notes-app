@@ -21,7 +21,8 @@ class FoldersSidebar extends StatelessWidget {
             children: [
               // Main scrollable content
               Padding(
-                padding: const EdgeInsets.only(bottom: 50), // Add padding for the bottom controls
+                padding: const EdgeInsets.only(
+                    bottom: 50), // Add padding for the bottom controls
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
@@ -34,19 +35,25 @@ class FoldersSidebar extends StatelessWidget {
                         icon: Icons.cloud_outlined,
                         title: 'All Notes',
                         count: notesProvider.notes.length.toString(),
-                        isSelected: notesProvider.selectedFolder == null && notesProvider.selectedTag == null,
+                        isSelected: notesProvider.selectedFolder == null &&
+                            notesProvider.selectedTag == null,
                         onTap: () => notesProvider.selectFolder(null),
                       ),
                       // Dynamic folders from provider
                       if (notesProvider.folders.isNotEmpty) ...[
-                        ...notesProvider.folders.map((folder) => _buildFolderItem(
+                        ...notesProvider.folders.map((folder) =>
+                            _buildFolderItem(
                               context,
                               icon: Icons.folder_outlined,
                               title: folder.name,
-                              count: notesProvider.getNoteCountForFolder(folder.id).toString(),
-                              isSelected: notesProvider.selectedFolder?.id == folder.id,
+                              count: notesProvider
+                                  .getNoteCountForFolder(folder.id)
+                                  .toString(),
+                              isSelected:
+                                  notesProvider.selectedFolder?.id == folder.id,
                               onTap: () => notesProvider.selectFolder(folder),
-                              onLongPress: () => _showFolderOptions(context, folder),
+                              onLongPress: () =>
+                                  _showFolderOptions(context, folder),
                             )),
                       ],
                     ],
@@ -60,11 +67,11 @@ class FoldersSidebar extends StatelessWidget {
                       onTap: () => notesProvider.selectTag(null),
                     ),
                     ...notesProvider.allTags.map((tag) => _buildTagItem(
-                      context,
-                      tag,
-                      isSelected: notesProvider.selectedTag == tag,
-                      onTap: () => notesProvider.selectTag(tag),
-                    )),
+                          context,
+                          tag,
+                          isSelected: notesProvider.selectedTag == tag,
+                          onTap: () => notesProvider.selectTag(tag),
+                        )),
 
                     // Add extra padding at the bottom to ensure content is visible above the sticky controls
                     const SizedBox(height: 20),
@@ -84,7 +91,9 @@ class FoldersSidebar extends StatelessWidget {
                     color: backgroundColor,
                     border: Border(
                       top: BorderSide(
-                        color: isDarkMode ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0),
+                        color: isDarkMode
+                            ? const Color(0xFF3D3D3D)
+                            : const Color(0xFFE0E0E0),
                         width: 1,
                       ),
                     ),
@@ -117,7 +126,8 @@ class FoldersSidebar extends StatelessWidget {
                             // Logout
                             await notesProvider.logout();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Logged out successfully')),
+                              const SnackBar(
+                                  content: Text('Logged out successfully')),
                             );
                           } else {
                             // Navigate to login screen
@@ -130,7 +140,9 @@ class FoldersSidebar extends StatelessWidget {
                             if (result == true) {
                               // Login successful, initialize API
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Initializing connection to Nextcloud...')),
+                                const SnackBar(
+                                    content: Text(
+                                        'Initializing connection to Nextcloud...')),
                               );
 
                               // Show loading indicator
@@ -140,16 +152,22 @@ class FoldersSidebar extends StatelessWidget {
                                 final success = await notesProvider.login();
                                 if (success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Connected to Nextcloud successfully!')),
+                                    const SnackBar(
+                                        content: Text(
+                                            'Connected to Nextcloud successfully!')),
                                   );
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Error: ${notesProvider.errorMessage ?? "Unknown error"}')),
+                                    SnackBar(
+                                        content: Text(
+                                            'Error: ${notesProvider.errorMessage ?? "Unknown error"}')),
                                   );
                                 }
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error connecting to Nextcloud: $e')),
+                                  SnackBar(
+                                      content: Text(
+                                          'Error connecting to Nextcloud: $e')),
                                 );
                                 notesProvider.setState(loading: false);
                               }
@@ -247,12 +265,8 @@ class FoldersSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildTagItem(
-    BuildContext context,
-    String tag,
-    {bool isSelected = false,
-    VoidCallback? onTap}
-  ) {
+  Widget _buildTagItem(BuildContext context, String tag,
+      {bool isSelected = false, VoidCallback? onTap}) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkMode ? Colors.white : Colors.black;
     final selectedColor = Theme.of(context).colorScheme.primary;
@@ -270,8 +284,12 @@ class FoldersSidebar extends StatelessWidget {
             ),
           ),
           backgroundColor: isDarkMode
-              ? (isSelected ? const Color(0xFF3D3D3D).withOpacity(0.7) : const Color(0xFF3D3D3D))
-              : (isSelected ? const Color(0xFFE5E5E5).withOpacity(0.7) : const Color(0xFFE5E5E5)),
+              ? (isSelected
+                  ? const Color(0xFF3D3D3D).withOpacity(0.7)
+                  : const Color(0xFF3D3D3D))
+              : (isSelected
+                  ? const Color(0xFFE5E5E5).withOpacity(0.7)
+                  : const Color(0xFFE5E5E5)),
           visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
           padding: EdgeInsets.zero,
           labelPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: -2),

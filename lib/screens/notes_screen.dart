@@ -51,7 +51,8 @@ class _NotesScreenState extends State<NotesScreen> {
                     setState(() {
                       foldersSidebarWidth += details.delta.dx;
                       // Ensure the width stays within the allowed range
-                      foldersSidebarWidth = foldersSidebarWidth.clamp(minSidebarWidth, maxSidebarWidth);
+                      foldersSidebarWidth = foldersSidebarWidth.clamp(
+                          minSidebarWidth, maxSidebarWidth);
                     });
                   },
                   child: MouseRegion(
@@ -62,7 +63,9 @@ class _NotesScreenState extends State<NotesScreen> {
                       child: Center(
                         child: Container(
                           width: 1,
-                          color: isDarkMode ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0),
+                          color: isDarkMode
+                              ? const Color(0xFF3D3D3D)
+                              : const Color(0xFFE0E0E0),
                         ),
                       ),
                     ),
@@ -82,7 +85,8 @@ class _NotesScreenState extends State<NotesScreen> {
                     setState(() {
                       notesListWidth += details.delta.dx;
                       // Ensure the width stays within the allowed range
-                      notesListWidth = notesListWidth.clamp(minSidebarWidth, maxSidebarWidth);
+                      notesListWidth = notesListWidth.clamp(
+                          minSidebarWidth, maxSidebarWidth);
                     });
                   },
                   child: MouseRegion(
@@ -93,7 +97,9 @@ class _NotesScreenState extends State<NotesScreen> {
                       child: Center(
                         child: Container(
                           width: 1,
-                          color: isDarkMode ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0),
+                          color: isDarkMode
+                              ? const Color(0xFF3D3D3D)
+                              : const Color(0xFFE0E0E0),
                         ),
                       ),
                     ),
@@ -111,7 +117,8 @@ class _NotesScreenState extends State<NotesScreen> {
                           child: Text(
                             'Select a note or create a new one',
                             style: TextStyle(
-                              color: isDarkMode ? Colors.white70 : Colors.black54,
+                              color:
+                                  isDarkMode ? Colors.white70 : Colors.black54,
                             ),
                           ),
                         );

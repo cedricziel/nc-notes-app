@@ -22,12 +22,15 @@ class NotesList extends StatelessWidget {
         final last7Days = now.subtract(const Duration(days: 7));
         final last30Days = now.subtract(const Duration(days: 30));
 
-        final recentNotes = notes.where((note) => note.updatedAt.isAfter(last7Days)).toList();
-        final olderNotes = notes.where((note) =>
-          note.updatedAt.isBefore(last7Days) &&
-          note.updatedAt.isAfter(last30Days)
-        ).toList();
-        final oldestNotes = notes.where((note) => note.updatedAt.isBefore(last30Days)).toList();
+        final recentNotes =
+            notes.where((note) => note.updatedAt.isAfter(last7Days)).toList();
+        final olderNotes = notes
+            .where((note) =>
+                note.updatedAt.isBefore(last7Days) &&
+                note.updatedAt.isAfter(last30Days))
+            .toList();
+        final oldestNotes =
+            notes.where((note) => note.updatedAt.isBefore(last30Days)).toList();
 
         return Scaffold(
           backgroundColor: backgroundColor,
@@ -74,17 +77,18 @@ class NotesList extends StatelessWidget {
                   children: [
                     if (recentNotes.isNotEmpty) ...[
                       _buildSectionHeader(context, 'Letzte 7 Tage'),
-                      ...recentNotes.map((note) => _buildNoteItem(context, note, selectedNote)),
+                      ...recentNotes.map((note) =>
+                          _buildNoteItem(context, note, selectedNote)),
                     ],
-
                     if (olderNotes.isNotEmpty) ...[
                       _buildSectionHeader(context, 'Letzte 30 Tage'),
-                      ...olderNotes.map((note) => _buildNoteItem(context, note, selectedNote)),
+                      ...olderNotes.map((note) =>
+                          _buildNoteItem(context, note, selectedNote)),
                     ],
-
                     if (oldestNotes.isNotEmpty) ...[
                       _buildSectionHeader(context, 'Januar'),
-                      ...oldestNotes.map((note) => _buildNoteItem(context, note, selectedNote)),
+                      ...oldestNotes.map((note) =>
+                          _buildNoteItem(context, note, selectedNote)),
                     ],
                   ],
                 ),
@@ -139,9 +143,8 @@ class NotesList extends StatelessWidget {
             : Colors.transparent,
         border: Border(
           bottom: BorderSide(
-            color: isDarkMode
-                ? const Color(0xFF3D3D3D)
-                : const Color(0xFFE0E0E0),
+            color:
+                isDarkMode ? const Color(0xFF3D3D3D) : const Color(0xFFE0E0E0),
             width: 0.5,
           ),
         ),
@@ -183,19 +186,22 @@ class NotesList extends StatelessWidget {
             ),
           ],
         ),
-        subtitle: note.content.isNotEmpty ? Text(
-          note.content,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 11,
-            color: textColor.withOpacity(0.7),
-          ),
-        ) : null,
+        subtitle: note.content.isNotEmpty
+            ? Text(
+                note.content,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: textColor.withOpacity(0.7),
+                ),
+              )
+            : null,
         dense: true,
         visualDensity: const VisualDensity(horizontal: 0, vertical: -3),
         selected: isSelected,
-        onTap: () => Provider.of<NotesProvider>(context, listen: false).selectNote(note),
+        onTap: () =>
+            Provider.of<NotesProvider>(context, listen: false).selectNote(note),
         onLongPress: () => _showNoteOptions(context, note),
       ),
     );

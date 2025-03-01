@@ -13,8 +13,9 @@ class Note {
   bool unsaved;
   bool saveError;
   List<String> tags;
-  Note? reference;  // Reference to the original server state for conflict detection
-  Note? conflict;   // Stores the server version when a conflict is detected
+  Note?
+      reference; // Reference to the original server state for conflict detection
+  Note? conflict; // Stores the server version when a conflict is detected
 
   Note({
     String? id,
@@ -138,9 +139,7 @@ class Note {
       favorite: json['favorite'] ?? false,
       unsaved: json['unsaved'] ?? false,
       saveError: json['saveError'] ?? false,
-      tags: json['tags'] != null
-          ? List<String>.from(json['tags'])
-          : [],
+      tags: json['tags'] != null ? List<String>.from(json['tags']) : [],
       reference: referenceNote,
       conflict: conflictNote,
     );

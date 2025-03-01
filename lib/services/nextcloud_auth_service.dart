@@ -39,7 +39,8 @@ class NextcloudAuthService {
           'loginUrl': data['login'],
         };
       } else {
-        throw Exception('Failed to initiate login flow: ${response.statusCode} ${response.body}');
+        throw Exception(
+            'Failed to initiate login flow: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
       debugPrint('Error initiating login flow: $e');
