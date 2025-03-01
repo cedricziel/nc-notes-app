@@ -6,12 +6,14 @@ import '../models/note.dart';
 import '../models/folder.dart';
 import '../services/auth_service.dart';
 import '../services/nextcloud_notes_api.dart';
+import '../utils/tag_utils.dart';
 
 class NotesProvider with ChangeNotifier {
   List<Note> _notes = [];
   List<Folder> _folders = [];
   Note? _selectedNote;
   Folder? _selectedFolder;
+  String? _selectedTag;
 
   final AuthService _authService = AuthService();
   NextcloudNotesApi? _api;
@@ -32,12 +34,29 @@ class NotesProvider with ChangeNotifier {
   List<Folder> get folders => _folders;
   Note? get selectedNote => _selectedNote;
   Folder? get selectedFolder => _selectedFolder;
+  String? get selectedTag => _selectedTag;
+
+  // Get all unique tags from all notes
+  List<String> get allTags {
+    final tagSet = <String>{};
+    for (final note in _notes) {
+      tagSet.addAll(note.tags);
+    }
+    return tagSet.toList()..sort();
+  }
 
   List<Note> get filteredNotes {
-    if (_selectedFolder == null) {
-      return _notes;
+    if (_selectedFolder != null) {
+      return _notes.where((note) => note.folder == _selectedFolder!.id).toList();
+    } else if (_selectedTag != null) {
+      return _notes.where((note) => note.tags.contains(_selectedTag)).toList();
     }
-    return _notes.where((note) => note.folder == _selectedFolder!.id).toList();
+    return _notes;
+  }
+
+  /// Get the number of notes in a specific folder
+  int getNoteCountForFolder(String folderId) {
+    return _notes.where((note) => note.folder == folderId).length;
   }
 
   NotesProvider() {
@@ -93,6 +112,14 @@ class NotesProvider with ChangeNotifier {
 
   void selectFolder(Folder? folder) {
     _selectedFolder = folder;
+    _selectedTag = null;
+    _selectedNote = null;
+    notifyListeners();
+  }
+
+  void selectTag(String? tag) {
+    _selectedTag = tag;
+    _selectedFolder = null;
     _selectedNote = null;
     notifyListeners();
   }
@@ -126,12 +153,19 @@ class NotesProvider with ChangeNotifier {
     // Log the current ETag before update
     debugPrint('Current note ETag before update: ${currentNote.etag}');
 
+    // Extract tags if content is updated
+    List<String> tags = currentNote.tags;
+    if (content != null) {
+      tags = extractTags(content);
+    }
+
     // Create updated note with reference to original state for conflict detection
     final updatedNote = currentNote.copyWith(
       title: title,
       content: content,
       updatedAt: DateTime.now(),
       unsaved: true,
+      tags: tags,
       reference: currentNote.reference ?? currentNote.createReference(),
     );
 
@@ -554,8 +588,14 @@ class NotesProvider with ChangeNotifier {
 
       // Update local notes with server notes, ensuring each has a reference copy
       final processedServerNotes = serverNotes.map((note) {
-        // Create a reference copy for each server note
-        return note.copyWith(reference: note.createReference());
+        // Extract tags from content
+        final tags = extractTags(note.content);
+
+        // Create a reference copy for each server note with tags
+        return note.copyWith(
+          tags: tags,
+          reference: note.createReference(),
+        );
       }).toList();
 
       _notes = [...processedServerNotes, ...localOnlyNotes];

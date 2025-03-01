@@ -12,6 +12,7 @@ class Note {
   bool favorite;
   bool unsaved;
   bool saveError;
+  List<String> tags;
   Note? reference;  // Reference to the original server state for conflict detection
   Note? conflict;   // Stores the server version when a conflict is detected
 
@@ -27,6 +28,7 @@ class Note {
     this.favorite = false,
     this.unsaved = false,
     this.saveError = false,
+    this.tags = const [],
     this.reference,
     this.conflict,
   })  : id = id ?? const Uuid().v4(),
@@ -44,6 +46,7 @@ class Note {
     bool? favorite,
     bool? unsaved,
     bool? saveError,
+    List<String>? tags,
     Note? reference,
     Note? conflict,
   }) {
@@ -59,6 +62,7 @@ class Note {
       favorite: favorite ?? this.favorite,
       unsaved: unsaved ?? this.unsaved,
       saveError: saveError ?? this.saveError,
+      tags: tags ?? this.tags,
       reference: reference ?? this.reference,
       conflict: conflict ?? this.conflict,
     );
@@ -76,6 +80,7 @@ class Note {
       etag: this.etag,
       readonly: this.readonly,
       favorite: this.favorite,
+      tags: this.tags,
     );
   }
 
@@ -92,6 +97,7 @@ class Note {
       'favorite': favorite,
       'unsaved': unsaved,
       'saveError': saveError,
+      'tags': tags,
     };
 
     // Add reference if it exists
@@ -132,6 +138,9 @@ class Note {
       favorite: json['favorite'] ?? false,
       unsaved: json['unsaved'] ?? false,
       saveError: json['saveError'] ?? false,
+      tags: json['tags'] != null
+          ? List<String>.from(json['tags'])
+          : [],
       reference: referenceNote,
       conflict: conflictNote,
     );

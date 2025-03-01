@@ -1,212 +1,25 @@
-# Nextcloud Notes Integration
+# UI Improvements for Nextcloud Notes Flutter App
 
 ## Goals
+1. Remove the yellow highlight of the separator
+2. Move the list/tile buttons to the middle panel and remove the resulting empty panel
+3. Make the two sidebars resizable
+4. Group the folders under the related account
+5. Remove the static items under the iCloud section
+6. Remove the "Schnellnotizen" section
+7. Ensure "All Notes" functionality for each account
 
-- [x] Add required dependencies (webview_flutter, flutter_secure_storage)
-- [x] Create AuthService for managing authentication
-- [x] Implement LoginScreen with WebView for Nextcloud login flow
-- [x] Update NotesProvider to use Nextcloud API when authenticated
-- [x] Update main.dart to check authentication status on startup
-- [x] Add logout functionality to NotesScreen
-- [x] Fix widget_test.dart to work with updated MyApp constructor
-- [x] Add macOS support
-
-## Implementation Details
-
-- Used WebView to implement Nextcloud's login flow
-- Securely store credentials using flutter_secure_storage
-- Added sync functionality to fetch notes from Nextcloud server
-- Implemented proper error handling for API requests
-- Added UI elements for login/logout and sync operations
-- Added macOS-specific UI improvements
-- Updated macOS entitlements for network access
-- Added custom URL scheme for Nextcloud authentication
-
-## macOS-specific Changes
-
-- Added network client entitlement to DebugProfile.entitlements and Release.entitlements
-- Added custom URL scheme (nc://) to Info.plist for handling authentication callbacks
-- Implemented responsive UI with macOS-specific adjustments
-- Added platform detection to customize UI based on platform
-
-## Bug Fixes
-
-- Fixed login screen button not enabling when text is entered in the server URL field
-  - Added a text controller listener to update state when text changes
-  - Created a dedicated state variable to track if the input field has text
-- Fixed 403 error when connecting to Nextcloud server
-  - Added required headers to match the iOS implementation
-  - Set custom User-Agent header
-  - Added Accept-Language header
-  - Added OCS-APIREQUEST header
-
-## Current Task: Fix Empty Screen After Login
-
-### Background
-
-- After successful login, the app was showing an empty screen instead of loading notes
-- The issue occurred during the transition from login screen back to notes screen
-- The app wasn't properly initializing the NotesProvider after authentication
-
-### Implementation Plan
-
-1. ✅ Improve error handling and logging:
-   - ✅ Added detailed debug logging throughout the authentication flow
-   - ✅ Enhanced error handling in NotesProvider.login() and syncWithServer()
-   - ✅ Added user-friendly error messages with SnackBar notifications
-
-2. ✅ Fix login flow in NotesScreen:
-   - ✅ Added proper loading indicators during API initialization
-   - ✅ Improved error handling when connecting to Nextcloud
-   - ✅ Added better user feedback during the connection process
-
-3. ✅ Enhance LoginScreen:
-   - ✅ Added debug logging to track the authentication flow
-   - ✅ Added a small delay after successful login for better UX
-   - ✅ Improved status messages during the login process
-
-4. ✅ Update main.dart for better initialization:
-   - ✅ Added FutureBuilder to handle the initial loading state
-   - ✅ Implemented proper initialization of NotesProvider on app start
-   - ✅ Added loading indicator while notes are being fetched
-
-5. ✅ Improve state management in NotesProvider:
-   - ✅ Added auto-selection of first note/folder when available
-   - ✅ Enhanced sync process with better error handling
-   - ✅ Added more detailed logging for debugging
-
-### Benefits
-
-- More reliable login and initialization process
-- Better user experience with appropriate loading indicators
-- Improved error handling and user feedback
-- Fixed the empty screen issue after login
-
-## Current Task: Fix ETag Conflict When Saving Notes
-
-### Background
-
-- Notes were being saved to the server, but sometimes failed with a "Precondition Failed" (412) error
-- This error occurs when the server rejects an update because the note has been modified since it was last retrieved
-- The ETag sent with the update request no longer matched the current ETag on the server
-
-### Implementation Plan
-
-1. ✅ Implement automatic conflict resolution:
-   - ✅ Added _fetchNoteFromServer() method to get the latest version of a note
-   - ✅ Enhanced _updateNoteOnServer() to detect 412 Precondition Failed errors
-   - ✅ Added retry logic that fetches the latest ETag and retries the update
-
-2. ✅ Improve error handling:
-   - ✅ Added specific error detection for ETag conflicts
-   - ✅ Added detailed logging to track the conflict resolution process
-   - ✅ Maintained local saving even if server saving fails
-
-### Benefits
-
-- Notes now save reliably even when edited from multiple devices
-- Automatic conflict resolution without user intervention
-- Improved error handling with detailed logging
-- Better synchronization between local and server states
-
-## Current Task: Add GitHub Dependabot and GitHub Actions
-
-### Background
-
-- GitHub Dependabot helps keep dependencies up-to-date by automatically creating pull requests
-- GitHub Actions provides CI/CD capabilities to automate testing, building, and deployment
-
-### Implementation Plan
-
-1. ✅ Add Dependabot configuration:
-   - ✅ Created `.github/dependabot.yml` to monitor pub dependencies
-   - ✅ Configured weekly updates with appropriate labels and grouping
-   - ✅ Set up commit message formatting for better changelog generation
-
-2. ✅ Set up GitHub Actions workflows:
-   - ✅ Created test workflow to run Flutter tests on each push and PR
-   - ✅ Created build workflow to build iOS and macOS versions
-   - ✅ Created lint workflow to ensure code quality standards
-
-### Benefits
-
-- Automated dependency updates to keep the project secure and up-to-date
-- Continuous integration to catch issues early
-- Consistent code quality through automated linting
-- Automated builds for multiple platforms
-
-## Completed Task: Fix ETag Deviation Issues When Saving Notes
-
-### Background
-
-- Despite implementing conflict resolution for ETags, there were issues with saving notes back to the server
-- ETag deviations were occurring, causing save operations to fail
-- The issue was related to how ETags were stored, updated, and compared during the save process
-
-### Implementation Plan
-
-1. ✅ Enhance ETag handling:
-   - ✅ Ensure ETags are properly extracted from server responses
-   - ✅ Consistently update the local note object with the new ETag after every server operation
-   - ✅ Make sure the updated note with the new ETag is properly saved to local storage
-
-2. ✅ Add detailed logging:
-   - ✅ Add logging for ETag values before and after server operations
-   - ✅ Track ETag changes throughout the note lifecycle
-   - ✅ Log ETag values during conflict resolution
-
-3. ✅ Strengthen conflict resolution:
-   - ✅ Improve the robustness of the conflict resolution logic
-   - ✅ Handle edge cases more effectively
-   - ✅ Implement retry mechanism with maximum attempts
-
-4. ✅ Implement TypeScript-like conflict resolution:
-   - ✅ Added reference copies of notes for better conflict detection
-   - ✅ Implemented three-way comparison (current, server, reference)
-   - ✅ Added manual conflict resolution options
-
-### Implemented Changes
-
-1. Fixed ETag format in headers:
-   - Added proper quoting of ETags in If-Match headers to match TypeScript implementation
-   - Ensured ETags are properly extracted from both response body and headers
-
-2. Enhanced Note model:
-   - Added reference and conflict fields to store original and server versions
-   - Added unsaved and saveError flags to track note state
-   - Updated serialization to persist these fields
-
-3. Implemented queue system for updates:
-   - Added queue for note update operations
-   - Implemented queue processing to prevent race conditions
-   - Added manual save functionality
-
-4. Enhanced NotesProvider:
-   - Completely rewrote the update process to use the queue system
-   - Implemented sophisticated conflict resolution similar to TypeScript client
-   - Added reference copies for all notes during sync
-   - Added detailed logging throughout the process
-
-5. Improved conflict handling:
-   - Added conflictSolutionLocal and conflictSolutionRemote methods
-   - Implemented three-way comparison for conflict detection
-   - Added proper conflict storage for manual resolution
-
-### Benefits
-
-- Reliable note saving to the server without ETag conflicts
-- Better understanding of ETag handling through detailed logs
-- Improved synchronization between local and server states
-- More robust conflict resolution with automatic retries
-- Manual conflict resolution options when automatic resolution isn't possible
-
-## Future Steps
-
-- Implement CRUD operations with the Nextcloud API
-- Add offline mode support
-- Improve error handling and user feedback
-- Add support for attachments
-- Add support for other desktop platforms (Windows, Linux)
-- Add visual indicator for unsaved changes
-- Expand GitHub Actions to include deployment steps
-- Add code coverage reporting to test workflow
+## Progress
+- Analyzed the code structure
+- Identified the relevant files:
+  - lib/screens/notes_screen.dart (main layout)
+  - lib/widgets/notes_list.dart (middle panel)
+  - lib/widgets/folders_sidebar.dart (left sidebar)
+- Completed all tasks:
+  1. ✅ Removed the yellow highlight of the separator by removing the yellow accent bar in the MarkdownEditor widget
+  2. ✅ Moved the list/tile buttons from the folders sidebar to the notes list panel
+  3. ✅ Made the two sidebars resizable by implementing custom resizable dividers with drag functionality
+  4. ✅ Grouped the folders under the Nextcloud account section
+  5. ✅ Removed the static items under the iCloud section
+  6. ✅ Removed the "Schnellnotizen" section
+  7. ✅ Made "All Notes" functional by connecting it to the NotesProvider and setting proper selection state
