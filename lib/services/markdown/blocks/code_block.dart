@@ -52,7 +52,8 @@ class CodeBlock extends MarkdownBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return CodeEditor(
       initialContent: content,
       initialLanguage: language,
@@ -127,7 +128,8 @@ class _CodeEditorState extends State<CodeEditor> {
       final currentCursor = _contentController.selection;
       _contentController.text = widget.initialContent;
       // Restore cursor position if it was valid
-      if (currentCursor.isValid && currentCursor.start <= _contentController.text.length) {
+      if (currentCursor.isValid &&
+          currentCursor.start <= _contentController.text.length) {
         _contentController.selection = currentCursor;
       }
     }
@@ -144,7 +146,8 @@ class _CodeEditorState extends State<CodeEditor> {
   }
 
   void _updateMarkdown() {
-    final newMarkdown = '```${_languageController.text}\n${_contentController.text}\n```';
+    final newMarkdown =
+        '```${_languageController.text}\n${_contentController.text}\n```';
     widget.onChanged(newMarkdown);
   }
 
@@ -164,7 +167,8 @@ class _CodeEditorState extends State<CodeEditor> {
                 controller: _languageController,
                 decoration: const InputDecoration(
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   border: OutlineInputBorder(),
                   hintText: 'language',
                 ),

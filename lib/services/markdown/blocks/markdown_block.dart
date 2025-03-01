@@ -8,7 +8,8 @@ abstract class MarkdownBlock {
   const MarkdownBlock({required this.content});
 
   /// Build an editor widget for this block
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged});
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged});
 
   /// Build a preview widget for this block
   Widget buildPreview(BuildContext context);
@@ -22,6 +23,7 @@ abstract class MarkdownBlock {
   /// Factory to create the appropriate block type from markdown content
   static MarkdownBlock fromMarkdown(String markdown) {
     // This will be implemented by the factory method in the MarkdownDocument class
-    throw UnimplementedError('Use MarkdownDocument.createBlockFromMarkdown instead');
+    throw UnimplementedError(
+        'Use MarkdownDocument.createBlockFromMarkdown instead');
   }
 }

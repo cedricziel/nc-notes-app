@@ -32,7 +32,8 @@ void main() {
       expect(find.text('Formatted View'), findsNothing);
     });
 
-    testWidgets('shows formatted view when focused', (WidgetTester tester) async {
+    testWidgets('shows formatted view when focused',
+        (WidgetTester tester) async {
       final formattedView = Container(
         key: const Key('formatted'),
         child: const Text('Formatted View'),
@@ -60,7 +61,8 @@ void main() {
       expect(find.text('Markdown View'), findsNothing);
     });
 
-    testWidgets('calls onFocusChanged when focus changes', (WidgetTester tester) async {
+    testWidgets('calls onFocusChanged when focus changes',
+        (WidgetTester tester) async {
       bool? focusState;
 
       final formattedView = Container(
@@ -96,7 +98,8 @@ void main() {
       expect(focusState, isTrue);
     });
 
-    testWidgets('applies border styling when focused', (WidgetTester tester) async {
+    testWidgets('applies border styling when focused',
+        (WidgetTester tester) async {
       final formattedView = Container(
         key: const Key('formatted'),
         child: const Text('Formatted View'),

@@ -7,7 +7,8 @@ class HoverAwareParagraphBlock extends MarkdownAwareBlock {
   const HoverAwareParagraphBlock({required super.content});
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return HoverAwareParagraphEditor(
       initialContent: content,
       onChanged: onChanged,
@@ -43,7 +44,8 @@ class HoverAwareParagraphEditor extends StatefulWidget {
   });
 
   @override
-  State<HoverAwareParagraphEditor> createState() => _HoverAwareParagraphEditorState();
+  State<HoverAwareParagraphEditor> createState() =>
+      _HoverAwareParagraphEditorState();
 }
 
 class _HoverAwareParagraphEditorState extends State<HoverAwareParagraphEditor> {
@@ -63,7 +65,8 @@ class _HoverAwareParagraphEditorState extends State<HoverAwareParagraphEditor> {
       final currentCursor = _controller.selection;
       _controller.text = widget.initialContent;
       // Restore cursor position if it was valid
-      if (currentCursor.isValid && currentCursor.start <= _controller.text.length) {
+      if (currentCursor.isValid &&
+          currentCursor.start <= _controller.text.length) {
         _controller.selection = currentCursor;
       }
     }

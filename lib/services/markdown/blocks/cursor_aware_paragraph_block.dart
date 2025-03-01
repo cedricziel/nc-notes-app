@@ -7,7 +7,8 @@ class CursorAwareParagraphBlock extends MarkdownAwareBlock {
   const CursorAwareParagraphBlock({required super.content});
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return CursorAwareParagraphEditor(
       initialContent: content,
       onChanged: onChanged,
@@ -49,10 +50,12 @@ class CursorAwareParagraphEditor extends StatefulWidget {
   });
 
   @override
-  State<CursorAwareParagraphEditor> createState() => _CursorAwareParagraphEditorState();
+  State<CursorAwareParagraphEditor> createState() =>
+      _CursorAwareParagraphEditorState();
 }
 
-class _CursorAwareParagraphEditorState extends State<CursorAwareParagraphEditor> {
+class _CursorAwareParagraphEditorState
+    extends State<CursorAwareParagraphEditor> {
   late TextEditingController _controller;
 
   @override
@@ -69,7 +72,8 @@ class _CursorAwareParagraphEditorState extends State<CursorAwareParagraphEditor>
       final currentCursor = _controller.selection;
       _controller.text = widget.initialContent;
       // Restore cursor position if it was valid
-      if (currentCursor.isValid && currentCursor.start <= _controller.text.length) {
+      if (currentCursor.isValid &&
+          currentCursor.start <= _controller.text.length) {
         _controller.selection = currentCursor;
       }
     }

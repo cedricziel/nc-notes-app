@@ -25,7 +25,8 @@ class HoverAwareHeadingBlock extends MarkdownAwareBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return HoverAwareHeadingEditor(
       initialContent: content,
       initialLevel: level,
@@ -75,7 +76,8 @@ class HoverAwareHeadingEditor extends StatefulWidget {
   });
 
   @override
-  State<HoverAwareHeadingEditor> createState() => _HoverAwareHeadingEditorState();
+  State<HoverAwareHeadingEditor> createState() =>
+      _HoverAwareHeadingEditorState();
 }
 
 class _HoverAwareHeadingEditorState extends State<HoverAwareHeadingEditor> {
@@ -97,7 +99,8 @@ class _HoverAwareHeadingEditorState extends State<HoverAwareHeadingEditor> {
       final currentCursor = _controller.selection;
       _controller.text = widget.initialContent;
       // Restore cursor position if it was valid
-      if (currentCursor.isValid && currentCursor.start <= _controller.text.length) {
+      if (currentCursor.isValid &&
+          currentCursor.start <= _controller.text.length) {
         _controller.selection = currentCursor;
       }
     }

@@ -20,27 +20,10 @@ class HoverAwareAdmonitionBlock extends MarkdownAwareBlock {
       // Extract type from the opening line
       type = lines[0].substring(3).trim();
 
-      // Extract content between the markers
+      // Extract content (all lines after the opening marker)
       if (lines.length > 1) {
         // Get all lines except the first one (opening marker)
-        final allContentLines = lines.sublist(1);
-
-        // Check if the last line is a closing marker
-        final lastLineIndex = allContentLines.length - 1;
-        if (lastLineIndex >= 0) {
-          if (allContentLines[lastLineIndex].trim() == ':::') {
-            // Exclude the closing marker
-            contentLines = allContentLines.sublist(0, lastLineIndex);
-          } else if (allContentLines[lastLineIndex].contains(':::')) {
-            // Split the last line at the closing marker
-            final parts = allContentLines[lastLineIndex].split(':::');
-            // Replace the last line with everything before the closing marker
-            allContentLines[lastLineIndex] = parts[0];
-            contentLines = allContentLines;
-          } else {
-            contentLines = allContentLines;
-          }
-        }
+        contentLines = lines.sublist(1);
       }
     } else {
       // If not properly formatted, just use the whole text as content
@@ -53,7 +36,8 @@ class HoverAwareAdmonitionBlock extends MarkdownAwareBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return HoverAwareAdmonitionEditor(
       initialContent: content,
       initialType: type,
@@ -108,7 +92,7 @@ class HoverAwareAdmonitionBlock extends MarkdownAwareBlock {
   }
 
   @override
-  String toMarkdown() => ':::$type\n$content\n:::';
+  String toMarkdown() => ':::$type\n$content';
 
   @override
   HoverAwareAdmonitionBlock copyWith({String? content}) {
@@ -183,10 +167,12 @@ class HoverAwareAdmonitionEditor extends StatefulWidget {
   });
 
   @override
-  State<HoverAwareAdmonitionEditor> createState() => _HoverAwareAdmonitionEditorState();
+  State<HoverAwareAdmonitionEditor> createState() =>
+      _HoverAwareAdmonitionEditorState();
 }
 
-class _HoverAwareAdmonitionEditorState extends State<HoverAwareAdmonitionEditor> {
+class _HoverAwareAdmonitionEditorState
+    extends State<HoverAwareAdmonitionEditor> {
   late TextEditingController _rawMarkdownController;
   bool _isEditing = false;
 
@@ -194,8 +180,7 @@ class _HoverAwareAdmonitionEditorState extends State<HoverAwareAdmonitionEditor>
   void initState() {
     super.initState();
     _rawMarkdownController = TextEditingController(
-      text: ':::${widget.initialType}\n${widget.initialContent}\n:::'
-    );
+        text: ':::${widget.initialType}\n${widget.initialContent}');
   }
 
   @override
@@ -206,7 +191,8 @@ class _HoverAwareAdmonitionEditorState extends State<HoverAwareAdmonitionEditor>
       // Only update if not currently editing to avoid overwriting user changes
       if (!_isEditing) {
         final currentCursor = _rawMarkdownController.selection;
-        _rawMarkdownController.text = ':::${widget.initialType}\n${widget.initialContent}\n:::';
+        _rawMarkdownController.text =
+            ':::${widget.initialType}\n${widget.initialContent}';
         // Restore cursor position if it was valid
         if (currentCursor.isValid &&
             currentCursor.start <= _rawMarkdownController.text.length) {
@@ -238,7 +224,8 @@ class _HoverAwareAdmonitionEditorState extends State<HoverAwareAdmonitionEditor>
   Widget _buildFormattedView(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _getAdmonitionColor(context, widget.initialType).withOpacity(0.1),
+        color:
+            _getAdmonitionColor(context, widget.initialType).withOpacity(0.1),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: _getAdmonitionColor(context, widget.initialType),

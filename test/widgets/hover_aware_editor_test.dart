@@ -35,7 +35,8 @@ void main() {
       expect(find.text('Formatted View'), findsOneWidget);
     });
 
-    testWidgets('shows markdown view when focused', (WidgetTester tester) async {
+    testWidgets('shows markdown view when focused',
+        (WidgetTester tester) async {
       final formattedView = Container(
         key: const Key('formatted'),
         child: const Text('Formatted View'),
@@ -70,14 +71,16 @@ void main() {
       // Tap on the formatted view to focus
       await tester.tap(find.byKey(const Key('formatted')));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300)); // Wait for animation
+      await tester
+          .pump(const Duration(milliseconds: 300)); // Wait for animation
 
       // After tapping, we should be able to find the TextField's hint text
       // which indicates the markdown view is now visible
       expect(find.text('Markdown View'), findsOneWidget);
     });
 
-    testWidgets('calls onFocusChanged when focus changes', (WidgetTester tester) async {
+    testWidgets('calls onFocusChanged when focus changes',
+        (WidgetTester tester) async {
       bool? focusState;
 
       final formattedView = Container(
@@ -116,7 +119,8 @@ void main() {
       expect(focusState, isTrue);
     });
 
-    testWidgets('applies styling to container when hovered/focused', (WidgetTester tester) async {
+    testWidgets('applies styling to container when hovered/focused',
+        (WidgetTester tester) async {
       final formattedView = Container(
         key: const Key('formatted'),
         child: const Text('Formatted View'),
@@ -152,7 +156,8 @@ void main() {
       // Tap on the formatted view to focus
       await tester.tap(find.byKey(const Key('formatted')));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300)); // Wait for animation
+      await tester
+          .pump(const Duration(milliseconds: 300)); // Wait for animation
 
       // Verify the focused container has a border
       final focusedContainer = tester.widget<AnimatedContainer>(

@@ -5,7 +5,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
-import 'block_based_markdown_editor.dart';
+import 'unified_markdown_editor.dart';
 import 'sync_indicator.dart';
 
 class MarkdownEditor extends StatefulWidget {
@@ -62,7 +62,8 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     _hasUnsavedChanges = true;
 
     // Debug logging for content changes
-    print('Content changed, scheduling save: ${_contentController.text.length} characters');
+    print(
+        'Content changed, scheduling save: ${_contentController.text.length} characters');
 
     // Cancel any pending save operation
     _saveTimer?.cancel();
@@ -76,8 +77,10 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
 
   // Save immediately without debounce
   void _saveNoteImmediately() {
-    print('Saving note immediately, content length: ${_contentController.text.length}');
-    print('Content preview: "${_contentController.text.substring(0, _contentController.text.length > 100 ? 100 : _contentController.text.length)}..."');
+    print(
+        'Saving note immediately, content length: ${_contentController.text.length}');
+    print(
+        'Content preview: "${_contentController.text.substring(0, _contentController.text.length > 100 ? 100 : _contentController.text.length)}..."');
 
     final notesProvider = Provider.of<NotesProvider>(context, listen: false);
     notesProvider.updateNote(
@@ -292,7 +295,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: BlockBasedMarkdownEditor(
+                    child: UnifiedMarkdownEditor(
                       initialMarkdown: _contentController.text,
                       onChanged: (newContent) {
                         _contentController.text = newContent;

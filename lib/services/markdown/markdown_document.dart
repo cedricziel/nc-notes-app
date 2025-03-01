@@ -26,12 +26,14 @@ class MarkdownDocument {
     for (final blockStr in blockStrings) {
       if (uniqueBlockStrings.contains(blockStr.trim())) {
         duplicateCount++;
-        print('WARNING: Duplicate block detected after splitting: "${blockStr.substring(0, blockStr.length > 30 ? 30 : blockStr.length)}..."');
+        print(
+            'WARNING: Duplicate block detected after splitting: "${blockStr.substring(0, blockStr.length > 30 ? 30 : blockStr.length)}..."');
       } else {
         uniqueBlockStrings.add(blockStr.trim());
       }
     }
-    print('Unique blocks after splitting: ${uniqueBlockStrings.length}, Duplicates: $duplicateCount');
+    print(
+        'Unique blocks after splitting: ${uniqueBlockStrings.length}, Duplicates: $duplicateCount');
 
     final blocks = blockStrings.map((blockStr) {
       final block = createBlockFromMarkdown(blockStr);
@@ -46,12 +48,14 @@ class MarkdownDocument {
     for (final content in blockContents) {
       if (uniqueBlockContents.contains(content.trim())) {
         finalDuplicateCount++;
-        print('WARNING: Duplicate block content in final blocks: "${content.substring(0, content.length > 30 ? 30 : content.length)}..."');
+        print(
+            'WARNING: Duplicate block content in final blocks: "${content.substring(0, content.length > 30 ? 30 : content.length)}..."');
       } else {
         uniqueBlockContents.add(content.trim());
       }
     }
-    print('Unique block contents in final result: ${uniqueBlockContents.length}, Duplicates: $finalDuplicateCount');
+    print(
+        'Unique block contents in final result: ${uniqueBlockContents.length}, Duplicates: $finalDuplicateCount');
 
     return MarkdownDocument(blocks: blocks);
   }
@@ -68,12 +72,14 @@ class MarkdownDocument {
       final content = blockContents[i];
       if (uniqueBlockContents.contains(content.trim())) {
         duplicateCount++;
-        print('WARNING: Duplicate block content at index $i: "${content.substring(0, content.length > 30 ? 30 : content.length)}..."');
+        print(
+            'WARNING: Duplicate block content at index $i: "${content.substring(0, content.length > 30 ? 30 : content.length)}..."');
       } else {
         uniqueBlockContents.add(content.trim());
       }
     }
-    print('Unique block contents before serialization: ${uniqueBlockContents.length}, Duplicates: $duplicateCount');
+    print(
+        'Unique block contents before serialization: ${uniqueBlockContents.length}, Duplicates: $duplicateCount');
 
     final blockTexts = blocks.map((block) {
       final markdown = block.toMarkdown();
@@ -88,19 +94,22 @@ class MarkdownDocument {
       final markdown = blockTexts[i];
       if (uniqueMarkdownBlocks.contains(markdown.trim())) {
         duplicateMarkdownCount++;
-        print('WARNING: Duplicate markdown at index $i: "${markdown.substring(0, markdown.length > 30 ? 30 : markdown.length)}..."');
+        print(
+            'WARNING: Duplicate markdown at index $i: "${markdown.substring(0, markdown.length > 30 ? 30 : markdown.length)}..."');
       } else {
         uniqueMarkdownBlocks.add(markdown.trim());
       }
     }
-    print('Unique markdown blocks: ${uniqueMarkdownBlocks.length}, Duplicates: $duplicateMarkdownCount');
+    print(
+        'Unique markdown blocks: ${uniqueMarkdownBlocks.length}, Duplicates: $duplicateMarkdownCount');
 
     final result = blockTexts.join('\n\n');
     print('Final markdown length: ${result.length} chars');
 
     // Check for potential duplication in the output
     final potentialBlocks = result.split('\n\n');
-    print('Potential blocks in output based on double newlines: ${potentialBlocks.length}');
+    print(
+        'Potential blocks in output based on double newlines: ${potentialBlocks.length}');
 
     // Check for duplicate blocks in the output
     final uniqueOutputBlocks = <String>{};
@@ -109,13 +118,15 @@ class MarkdownDocument {
       if (block.trim().isNotEmpty) {
         if (uniqueOutputBlocks.contains(block.trim())) {
           duplicateOutputCount++;
-          print('WARNING: Duplicate block in output: "${block.substring(0, block.length > 30 ? 30 : block.length)}..."');
+          print(
+              'WARNING: Duplicate block in output: "${block.substring(0, block.length > 30 ? 30 : block.length)}..."');
         } else {
           uniqueOutputBlocks.add(block.trim());
         }
       }
     }
-    print('Unique blocks in output: ${uniqueOutputBlocks.length}, Duplicates: $duplicateOutputCount');
+    print(
+        'Unique blocks in output: ${uniqueOutputBlocks.length}, Duplicates: $duplicateOutputCount');
 
     return result;
   }
@@ -161,7 +172,8 @@ class MarkdownDocument {
 
     // Check for potential duplication in the input
     final potentialBlocks = markdown.split('\n\n');
-    print('Potential blocks based on double newlines: ${potentialBlocks.length}');
+    print(
+        'Potential blocks based on double newlines: ${potentialBlocks.length}');
 
     // Check for duplicate blocks in the input
     final uniqueBlocks = <String>{};
@@ -170,13 +182,15 @@ class MarkdownDocument {
       if (block.trim().isNotEmpty) {
         if (uniqueBlocks.contains(block.trim())) {
           duplicateCount++;
-          print('WARNING: Duplicate block detected in input: "${block.substring(0, block.length > 30 ? 30 : block.length)}..."');
+          print(
+              'WARNING: Duplicate block detected in input: "${block.substring(0, block.length > 30 ? 30 : block.length)}..."');
         } else {
           uniqueBlocks.add(block.trim());
         }
       }
     }
-    print('Unique blocks in input: ${uniqueBlocks.length}, Duplicates: $duplicateCount');
+    print(
+        'Unique blocks in input: ${uniqueBlocks.length}, Duplicates: $duplicateCount');
 
     String currentBlock = '';
     String blockType = '';
@@ -194,7 +208,8 @@ class MarkdownDocument {
           // End current block if not in code or admonition block
           print('Line $i: Empty line, ending block of type "$blockType"');
           blocks.add(currentBlock.trim());
-          print('Added block: "${currentBlock.trim().substring(0, currentBlock.length > 20 ? 20 : currentBlock.length)}..."');
+          print(
+              'Added block: "${currentBlock.trim().substring(0, currentBlock.length > 20 ? 20 : currentBlock.length)}..."');
           currentBlock = '';
           blockType = '';
         } else {
@@ -216,7 +231,8 @@ class MarkdownDocument {
           // Start of code block
           if (currentBlock.isNotEmpty) {
             // End previous block if any
-            print('Line $i: Start of code block, ending previous block of type "$blockType"');
+            print(
+                'Line $i: Start of code block, ending previous block of type "$blockType"');
             blocks.add(currentBlock.trim());
             currentBlock = '';
           } else {
@@ -230,44 +246,14 @@ class MarkdownDocument {
 
       // Handle admonition blocks
       if (line.startsWith(':::')) {
-        if (blockType == 'admonition') {
-          // End of admonition block
-          currentBlock += '\n' + line;
+        // Start of admonition block
+        if (currentBlock.isNotEmpty) {
+          // End previous block if any
           blocks.add(currentBlock.trim());
           currentBlock = '';
-          blockType = '';
-        } else {
-          // Start of admonition block
-          if (currentBlock.isNotEmpty) {
-            // End previous block if any
-            blocks.add(currentBlock.trim());
-            currentBlock = '';
-          }
-          currentBlock = line;
-          blockType = 'admonition';
         }
-        continue;
-      }
-
-      // Handle content inside admonition blocks
-      if (blockType == 'admonition' && line.contains(':::') && !line.startsWith(':::')) {
-        // This line contains a closing marker, but is not a standalone marker
-        // Split the line at the closing marker
-        final parts = line.split(':::');
-        // Add the content before the marker to the current block
-        currentBlock += '\n' + parts[0];
-        // Add the closing marker
-        currentBlock += '\n:::';
-        // End the admonition block
-        blocks.add(currentBlock.trim());
-        currentBlock = '';
-        blockType = '';
-
-        // If there's content after the marker, start a new block with it
-        if (parts.length > 1 && parts[1].trim().isNotEmpty) {
-          currentBlock = parts[1].trim();
-          blockType = _determineBlockType(currentBlock);
-        }
+        currentBlock = line;
+        blockType = 'admonition';
         continue;
       }
 
@@ -293,7 +279,9 @@ class MarkdownDocument {
       }
 
       // Handle headings
-      if (line.startsWith('#') && blockType != 'code' && blockType != 'admonition') {
+      if (line.startsWith('#') &&
+          blockType != 'code' &&
+          blockType != 'admonition') {
         if (currentBlock.isNotEmpty) {
           // End previous block if any
           blocks.add(currentBlock.trim());
@@ -303,8 +291,10 @@ class MarkdownDocument {
       }
 
       // Handle paragraph after heading without blank line
-      if (blockType == 'heading' && !line.startsWith('#') &&
-          !line.startsWith('```') && !line.startsWith(':::') &&
+      if (blockType == 'heading' &&
+          !line.startsWith('#') &&
+          !line.startsWith('```') &&
+          !line.startsWith(':::') &&
           !_isTableRow(line)) {
         // Split the heading from the paragraph
         final headingLine = currentBlock.split('\n')[0];
@@ -331,7 +321,8 @@ class MarkdownDocument {
     if (currentBlock.isNotEmpty) {
       print('Adding final block of type "$blockType"');
       blocks.add(currentBlock.trim());
-      print('Added block: "${currentBlock.trim().substring(0, currentBlock.length > 20 ? 20 : currentBlock.length)}..."');
+      print(
+          'Added block: "${currentBlock.trim().substring(0, currentBlock.length > 20 ? 20 : currentBlock.length)}..."');
     }
 
     return blocks;
@@ -341,8 +332,10 @@ class MarkdownDocument {
   static String _determineBlockType(String line) {
     if (line.startsWith('#')) return 'heading';
     if (line.startsWith('>')) return 'quote';
-    if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('+ ')) return 'list';
-    if (line.startsWith('1. ') || RegExp(r'^\d+\. ').hasMatch(line)) return 'ordered_list';
+    if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('+ '))
+      return 'list';
+    if (line.startsWith('1. ') || RegExp(r'^\d+\. ').hasMatch(line))
+      return 'ordered_list';
     if (_isTableRow(line)) return 'table';
     if (line.startsWith('```')) return 'code';
     if (line.startsWith(':::')) return 'admonition';

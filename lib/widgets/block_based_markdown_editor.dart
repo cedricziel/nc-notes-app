@@ -16,7 +16,8 @@ class BlockBasedMarkdownEditor extends StatefulWidget {
   });
 
   @override
-  State<BlockBasedMarkdownEditor> createState() => _BlockBasedMarkdownEditorState();
+  State<BlockBasedMarkdownEditor> createState() =>
+      _BlockBasedMarkdownEditorState();
 }
 
 class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
@@ -51,7 +52,8 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
         final match = RegExp(r'^(#{1,6})\s+(.+)$').firstMatch(trimmedContent);
         if (match != null) {
           print('Converting block to heading: $trimmedContent');
-          updatedBlock = MarkdownDocument.createBlockFromMarkdown(trimmedContent);
+          updatedBlock =
+              MarkdownDocument.createBlockFromMarkdown(trimmedContent);
         } else {
           // If it doesn't match heading pattern, just update content
           updatedBlock = currentBlock.copyWith(content: newContent);
@@ -64,7 +66,7 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
       }
       // Otherwise, if it was an admonition or heading, convert to paragraph
       else if (currentBlock.runtimeType.toString().contains('Admonition') ||
-               currentBlock.runtimeType.toString().contains('Heading')) {
+          currentBlock.runtimeType.toString().contains('Heading')) {
         print('Converting block to paragraph: $trimmedContent');
         updatedBlock = MarkdownDocument.createBlockFromMarkdown(trimmedContent);
       }
@@ -136,9 +138,7 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
 
         // Blocks
         Expanded(
-          child: _isPreviewMode
-              ? _buildPreviewMode()
-              : _buildEditMode(),
+          child: _isPreviewMode ? _buildPreviewMode() : _buildEditMode(),
         ),
       ],
     );

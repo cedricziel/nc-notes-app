@@ -31,18 +31,22 @@ void main() {
       });
 
       test('handles multi-line code blocks', () {
-        const markdown = '```python\ndef hello():\n    print("Hello, world!")\n```';
+        const markdown =
+            '```python\ndef hello():\n    print("Hello, world!")\n```';
         final block = CodeBlock.fromMarkdown(markdown);
 
-        expect(block.content, equals('def hello():\n    print("Hello, world!")'));
+        expect(
+            block.content, equals('def hello():\n    print("Hello, world!")'));
         expect(block.language, equals('python'));
       });
 
       test('handles code blocks with special characters', () {
-        const markdown = '```html\n<div class="container">\n  <!-- Comment -->\n</div>\n```';
+        const markdown =
+            '```html\n<div class="container">\n  <!-- Comment -->\n</div>\n```';
         final block = CodeBlock.fromMarkdown(markdown);
 
-        expect(block.content, equals('<div class="container">\n  <!-- Comment -->\n</div>'));
+        expect(block.content,
+            equals('<div class="container">\n  <!-- Comment -->\n</div>'));
         expect(block.language, equals('html'));
       });
 
@@ -92,7 +96,8 @@ void main() {
         const newContent = '```python\ndef hello():\n    print("Hello")\n```';
         const originalLanguage = 'javascript';
 
-        final block = CodeBlock(content: originalContent, language: originalLanguage);
+        final block =
+            CodeBlock(content: originalContent, language: originalLanguage);
         final newBlock = block.copyWith(content: newContent);
 
         // Should re-parse the content as a code block
@@ -112,7 +117,9 @@ void main() {
       });
     });
 
-    testWidgets('buildEditor creates a code editor with content and language field', (WidgetTester tester) async {
+    testWidgets(
+        'buildEditor creates a code editor with content and language field',
+        (WidgetTester tester) async {
       const content = 'const x = 5;';
       const language = 'javascript';
       final block = CodeBlock(content: content, language: language);
@@ -143,7 +150,8 @@ void main() {
       expect(find.text(language), findsOneWidget);
     });
 
-    testWidgets('buildPreview creates a markdown widget with code block', (WidgetTester tester) async {
+    testWidgets('buildPreview creates a markdown widget with code block',
+        (WidgetTester tester) async {
       const content = 'const x = 5;';
       const language = 'javascript';
       final block = CodeBlock(content: content, language: language);

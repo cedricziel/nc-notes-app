@@ -28,7 +28,8 @@ class CursorAwareHeadingBlock extends MarkdownAwareBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return CursorAwareHeadingEditor(
       initialContent: content,
       level: level,
@@ -76,7 +77,8 @@ class CursorAwareHeadingEditor extends StatefulWidget {
   });
 
   @override
-  State<CursorAwareHeadingEditor> createState() => _CursorAwareHeadingEditorState();
+  State<CursorAwareHeadingEditor> createState() =>
+      _CursorAwareHeadingEditorState();
 }
 
 class _CursorAwareHeadingEditorState extends State<CursorAwareHeadingEditor> {
@@ -96,7 +98,8 @@ class _CursorAwareHeadingEditorState extends State<CursorAwareHeadingEditor> {
       final currentCursor = _controller.selection;
       _controller.text = widget.initialContent;
       // Restore cursor position if it was valid
-      if (currentCursor.isValid && currentCursor.start <= _controller.text.length) {
+      if (currentCursor.isValid &&
+          currentCursor.start <= _controller.text.length) {
         _controller.selection = currentCursor;
       }
     }
@@ -145,19 +148,26 @@ class _CursorAwareHeadingEditorState extends State<CursorAwareHeadingEditor> {
 
     switch (widget.level) {
       case 1:
-        return textTheme.headlineLarge ?? const TextStyle(fontSize: 28, fontWeight: FontWeight.bold);
+        return textTheme.headlineLarge ??
+            const TextStyle(fontSize: 28, fontWeight: FontWeight.bold);
       case 2:
-        return textTheme.headlineMedium ?? const TextStyle(fontSize: 24, fontWeight: FontWeight.bold);
+        return textTheme.headlineMedium ??
+            const TextStyle(fontSize: 24, fontWeight: FontWeight.bold);
       case 3:
-        return textTheme.headlineSmall ?? const TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
+        return textTheme.headlineSmall ??
+            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
       case 4:
-        return textTheme.titleLarge ?? const TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
+        return textTheme.titleLarge ??
+            const TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
       case 5:
-        return textTheme.titleMedium ?? const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+        return textTheme.titleMedium ??
+            const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
       case 6:
-        return textTheme.titleSmall ?? const TextStyle(fontSize: 14, fontWeight: FontWeight.bold);
+        return textTheme.titleSmall ??
+            const TextStyle(fontSize: 14, fontWeight: FontWeight.bold);
       default:
-        return textTheme.titleMedium ?? const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+        return textTheme.titleMedium ??
+            const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
     }
   }
 }

@@ -45,7 +45,8 @@ void main() {
       expect(newBlock.content, equals(content));
     });
 
-    testWidgets('buildEditor creates a text field with content', (WidgetTester tester) async {
+    testWidgets('buildEditor creates a text field with content',
+        (WidgetTester tester) async {
       const content = 'Test paragraph';
       final block = ParagraphBlock(content: content);
       String? updatedContent;
@@ -72,7 +73,8 @@ void main() {
       expect(find.text(content), findsOneWidget);
     });
 
-    testWidgets('buildPreview creates a markdown widget with content', (WidgetTester tester) async {
+    testWidgets('buildPreview creates a markdown widget with content',
+        (WidgetTester tester) async {
       const content = 'Test paragraph';
       final block = ParagraphBlock(content: content);
 

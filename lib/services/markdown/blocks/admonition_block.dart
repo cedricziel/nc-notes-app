@@ -19,27 +19,10 @@ class AdmonitionBlock extends MarkdownBlock {
       // Extract type from the opening line
       type = lines[0].substring(3).trim();
 
-      // Extract content between the markers
+      // Extract content (all lines after the opening marker)
       if (lines.length > 1) {
         // Get all lines except the first one (opening marker)
-        final allContentLines = lines.sublist(1);
-
-        // Check if the last line is a closing marker
-        final lastLineIndex = allContentLines.length - 1;
-        if (lastLineIndex >= 0) {
-          if (allContentLines[lastLineIndex].trim() == ':::') {
-            // Exclude the closing marker
-            contentLines = allContentLines.sublist(0, lastLineIndex);
-          } else if (allContentLines[lastLineIndex].contains(':::')) {
-            // Split the last line at the closing marker
-            final parts = allContentLines[lastLineIndex].split(':::');
-            // Replace the last line with everything before the closing marker
-            allContentLines[lastLineIndex] = parts[0];
-            contentLines = allContentLines;
-          } else {
-            contentLines = allContentLines;
-          }
-        }
+        contentLines = lines.sublist(1);
       }
     } else {
       // If not properly formatted, just use the whole text as content
@@ -52,7 +35,8 @@ class AdmonitionBlock extends MarkdownBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return AdmonitionEditor(
       initialContent: content,
       initialType: type,
@@ -107,7 +91,7 @@ class AdmonitionBlock extends MarkdownBlock {
   }
 
   @override
-  String toMarkdown() => ':::$type\n$content\n:::';
+  String toMarkdown() => ':::$type\n$content';
 
   @override
   AdmonitionBlock copyWith({String? content}) {
@@ -204,7 +188,8 @@ class _AdmonitionEditorState extends State<AdmonitionEditor> {
       final currentCursor = _contentController.selection;
       _contentController.text = widget.initialContent;
       // Restore cursor position if it was valid
-      if (currentCursor.isValid && currentCursor.start <= _contentController.text.length) {
+      if (currentCursor.isValid &&
+          currentCursor.start <= _contentController.text.length) {
         _contentController.selection = currentCursor;
       }
     }
@@ -221,7 +206,8 @@ class _AdmonitionEditorState extends State<AdmonitionEditor> {
   }
 
   void _updateMarkdown() {
-    final newMarkdown = ':::${_typeController.text}\n${_contentController.text}\n:::';
+    final newMarkdown =
+        ':::${_typeController.text}\n${_contentController.text}';
     widget.onChanged(newMarkdown);
   }
 
@@ -261,7 +247,8 @@ class _AdmonitionEditorState extends State<AdmonitionEditor> {
                 controller: _typeController,
                 decoration: const InputDecoration(
                   isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   border: OutlineInputBorder(),
                   hintText: 'type',
                 ),
@@ -279,7 +266,8 @@ class _AdmonitionEditorState extends State<AdmonitionEditor> {
         // Content editor
         Container(
           decoration: BoxDecoration(
-            color: _getAdmonitionColor(context, _typeController.text).withOpacity(0.1),
+            color: _getAdmonitionColor(context, _typeController.text)
+                .withOpacity(0.1),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
               color: _getAdmonitionColor(context, _typeController.text),

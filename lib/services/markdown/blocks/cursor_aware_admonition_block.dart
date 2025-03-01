@@ -27,24 +27,6 @@ class CursorAwareAdmonitionBlock extends MarkdownAwareBlock {
     final type = typeMatch?.group(1) ?? 'note';
     final title = typeMatch?.group(2) ?? '';
 
-    // Find the closing marker
-    int closingIndex = -1;
-    for (int i = 1; i < lines.length; i++) {
-      if (lines[i].trim() == ':::') {
-        closingIndex = i;
-        break;
-      }
-    }
-
-    if (closingIndex == -1) {
-      // If no closing marker is found, treat the rest as content
-      closingIndex = lines.length;
-    }
-
-    // Extract content (everything between opening and closing markers)
-    final contentLines = lines.sublist(1, closingIndex);
-    final contentText = contentLines.join('\n');
-
     return CursorAwareAdmonitionBlock(
       content: markdown,
       type: type,
@@ -53,7 +35,8 @@ class CursorAwareAdmonitionBlock extends MarkdownAwareBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return CursorAwareAdmonitionEditor(
       initialContent: content,
       type: type,
@@ -91,45 +74,49 @@ class CursorAwareAdmonitionBlock extends MarkdownAwareBlock {
 
     switch (type.toLowerCase()) {
       case 'info':
-        backgroundColor = isDarkMode ? Colors.blue.shade900.withOpacity(0.2) : Colors.blue.shade50;
+        backgroundColor = isDarkMode
+            ? Colors.blue.shade900.withOpacity(0.2)
+            : Colors.blue.shade50;
         borderColor = Colors.blue.shade300;
         icon = Icons.info_outline;
         break;
       case 'warning':
-        backgroundColor = isDarkMode ? Colors.orange.shade900.withOpacity(0.2) : Colors.orange.shade50;
+        backgroundColor = isDarkMode
+            ? Colors.orange.shade900.withOpacity(0.2)
+            : Colors.orange.shade50;
         borderColor = Colors.orange.shade300;
         icon = Icons.warning_amber_outlined;
         break;
       case 'danger':
-        backgroundColor = isDarkMode ? Colors.red.shade900.withOpacity(0.2) : Colors.red.shade50;
+        backgroundColor = isDarkMode
+            ? Colors.red.shade900.withOpacity(0.2)
+            : Colors.red.shade50;
         borderColor = Colors.red.shade300;
         icon = Icons.dangerous_outlined;
         break;
       case 'success':
-        backgroundColor = isDarkMode ? Colors.green.shade900.withOpacity(0.2) : Colors.green.shade50;
+        backgroundColor = isDarkMode
+            ? Colors.green.shade900.withOpacity(0.2)
+            : Colors.green.shade50;
         borderColor = Colors.green.shade300;
         icon = Icons.check_circle_outline;
         break;
       case 'note':
       default:
-        backgroundColor = isDarkMode ? Colors.grey.shade800.withOpacity(0.2) : Colors.grey.shade100;
+        backgroundColor = isDarkMode
+            ? Colors.grey.shade800.withOpacity(0.2)
+            : Colors.grey.shade100;
         borderColor = Colors.grey.shade400;
         icon = Icons.note_outlined;
         break;
     }
 
-    // Extract content (everything between opening and closing markers)
+    // Extract content (everything after the opening marker)
     final lines = content.split('\n');
     int startIndex = 1; // Skip the first line (:::type)
-    int endIndex = lines.length - 1; // Skip the last line (:::)
-
-    // If the last line isn't a closing marker, include it
-    if (!lines.last.trim().startsWith(':::')) {
-      endIndex = lines.length;
-    }
 
     // Extract content
-    final contentLines = lines.sublist(startIndex, endIndex);
+    final contentLines = lines.sublist(startIndex);
     final contentText = contentLines.join('\n');
 
     return Container(
@@ -156,7 +143,9 @@ class CursorAwareAdmonitionBlock extends MarkdownAwareBlock {
                     title,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isDarkMode ? borderColor : borderColor.withOpacity(0.8),
+                      color: isDarkMode
+                          ? borderColor
+                          : borderColor.withOpacity(0.8),
                     ),
                   ),
                 ],
@@ -197,10 +186,12 @@ class CursorAwareAdmonitionEditor extends StatefulWidget {
   });
 
   @override
-  State<CursorAwareAdmonitionEditor> createState() => _CursorAwareAdmonitionEditorState();
+  State<CursorAwareAdmonitionEditor> createState() =>
+      _CursorAwareAdmonitionEditorState();
 }
 
-class _CursorAwareAdmonitionEditorState extends State<CursorAwareAdmonitionEditor> {
+class _CursorAwareAdmonitionEditorState
+    extends State<CursorAwareAdmonitionEditor> {
   late TextEditingController _controller;
 
   @override
@@ -217,7 +208,8 @@ class _CursorAwareAdmonitionEditorState extends State<CursorAwareAdmonitionEdito
       final currentCursor = _controller.selection;
       _controller.text = widget.initialContent;
       // Restore cursor position if it was valid
-      if (currentCursor.isValid && currentCursor.start <= _controller.text.length) {
+      if (currentCursor.isValid &&
+          currentCursor.start <= _controller.text.length) {
         _controller.selection = currentCursor;
       }
     }

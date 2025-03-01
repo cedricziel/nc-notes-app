@@ -7,7 +7,8 @@ import 'package:flutter_notes/services/markdown/blocks/cursor_aware_admonition_b
 
 void main() {
   group('BlockBasedMarkdownEditor', () {
-    testWidgets('renders blocks from initial markdown', (WidgetTester tester) async {
+    testWidgets('renders blocks from initial markdown',
+        (WidgetTester tester) async {
       const initialMarkdown = '# Heading\n\nParagraph text';
       String? updatedMarkdown;
 
@@ -42,7 +43,8 @@ void main() {
       expect(paragraphFinders, findsWidgets);
     });
 
-    testWidgets('transforms paragraph to heading when # is added', (WidgetTester tester) async {
+    testWidgets('transforms paragraph to heading when # is added',
+        (WidgetTester tester) async {
       const initialMarkdown = 'Paragraph text';
       String? updatedMarkdown;
 
@@ -86,7 +88,8 @@ void main() {
       expect(controller.value, contains('# Heading text'));
     });
 
-    testWidgets('transforms paragraph to admonition when ::: is added', (WidgetTester tester) async {
+    testWidgets('transforms paragraph to admonition when ::: is added',
+        (WidgetTester tester) async {
       const initialMarkdown = 'Paragraph text';
       String? updatedMarkdown;
 
@@ -131,7 +134,8 @@ void main() {
       expect(controller.value, contains('Admonition text'));
     });
 
-    testWidgets('transforms heading to paragraph when # is removed', (WidgetTester tester) async {
+    testWidgets('transforms heading to paragraph when # is removed',
+        (WidgetTester tester) async {
       const initialMarkdown = '# Heading text';
       String? updatedMarkdown;
 
@@ -164,7 +168,8 @@ void main() {
       expect(controller.value, isNot(contains('#')));
     });
 
-    testWidgets('transforms admonition to paragraph when ::: is removed', (WidgetTester tester) async {
+    testWidgets('transforms admonition to paragraph when ::: is removed',
+        (WidgetTester tester) async {
       const initialMarkdown = ':::info\nAdmonition text\n:::';
       String? updatedMarkdown;
 
@@ -197,7 +202,8 @@ void main() {
       expect(controller.value, isNot(contains(':::')));
     });
 
-    testWidgets('adds a new block after the current one', (WidgetTester tester) async {
+    testWidgets('adds a new block after the current one',
+        (WidgetTester tester) async {
       const initialMarkdown = 'Paragraph text';
       String? updatedMarkdown;
 
@@ -255,7 +261,8 @@ void main() {
       expect(updatedMarkdown, equals('Paragraph 2'));
     });
 
-    testWidgets('toggles between edit and preview modes', (WidgetTester tester) async {
+    testWidgets('toggles between edit and preview modes',
+        (WidgetTester tester) async {
       const initialMarkdown = '# Heading\n\nParagraph text';
 
       await tester.pumpWidget(

@@ -39,10 +39,12 @@ void main() {
       });
 
       test('handles headings with special characters', () {
-        const markdown = '## Special *Heading* with [link](https://example.com)';
+        const markdown =
+            '## Special *Heading* with [link](https://example.com)';
         final block = HeadingBlock.fromMarkdown(markdown);
 
-        expect(block.content, equals('Special *Heading* with [link](https://example.com)'));
+        expect(block.content,
+            equals('Special *Heading* with [link](https://example.com)'));
         expect(block.level, equals(2));
       });
 
@@ -50,7 +52,7 @@ void main() {
         const invalidMarkdown = 'Not a heading';
 
         expect(() => HeadingBlock.fromMarkdown(invalidMarkdown),
-               throwsArgumentError);
+            throwsArgumentError);
       });
     });
 
@@ -85,7 +87,8 @@ void main() {
         const newContent = '# New Heading';
         const originalLevel = 2;
 
-        final block = HeadingBlock(content: originalContent, level: originalLevel);
+        final block =
+            HeadingBlock(content: originalContent, level: originalLevel);
         final newBlock = block.copyWith(content: newContent);
 
         // Level should be updated based on the new content
@@ -105,7 +108,8 @@ void main() {
       });
     });
 
-    testWidgets('buildEditor creates a heading editor with content', (WidgetTester tester) async {
+    testWidgets('buildEditor creates a heading editor with content',
+        (WidgetTester tester) async {
       const content = 'Test Heading';
       const level = 2;
       final block = HeadingBlock(content: content, level: level);
@@ -136,7 +140,8 @@ void main() {
       expect(find.byType(DropdownButton<int>), findsOneWidget);
     });
 
-    testWidgets('buildPreview creates a markdown widget with heading', (WidgetTester tester) async {
+    testWidgets('buildPreview creates a markdown widget with heading',
+        (WidgetTester tester) async {
       const content = 'Test Heading';
       const level = 2;
       final block = HeadingBlock(content: content, level: level);

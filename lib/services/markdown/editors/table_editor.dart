@@ -24,7 +24,8 @@ class _TableEditorState extends State<TableEditor> {
   @override
   void initState() {
     super.initState();
-    _cells = List.from(widget.initialCells.map((row) => List<String>.from(row)));
+    _cells =
+        List.from(widget.initialCells.map((row) => List<String>.from(row)));
     _hasHeader = widget.initialHasHeader;
     _initializeControllers();
   }
@@ -45,7 +46,6 @@ class _TableEditorState extends State<TableEditor> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialCells != widget.initialCells ||
         oldWidget.initialHasHeader != widget.initialHasHeader) {
-
       // Store current cursor positions
       final cursorPositions = <List<TextSelection>>[];
       for (var i = 0; i < _controllers.length; i++) {
@@ -57,7 +57,8 @@ class _TableEditorState extends State<TableEditor> {
       }
 
       // Update cells and header
-      _cells = List.from(widget.initialCells.map((row) => List<String>.from(row)));
+      _cells =
+          List.from(widget.initialCells.map((row) => List<String>.from(row)));
       _hasHeader = widget.initialHasHeader;
 
       // Dispose old controllers
@@ -71,10 +72,15 @@ class _TableEditorState extends State<TableEditor> {
       _initializeControllers();
 
       // Restore cursor positions where possible
-      for (var i = 0; i < _controllers.length && i < cursorPositions.length; i++) {
-        for (var j = 0; j < _controllers[i].length && j < cursorPositions[i].length; j++) {
+      for (var i = 0;
+          i < _controllers.length && i < cursorPositions.length;
+          i++) {
+        for (var j = 0;
+            j < _controllers[i].length && j < cursorPositions[i].length;
+            j++) {
           final selection = cursorPositions[i][j];
-          if (selection.isValid && selection.start <= _controllers[i][j].text.length) {
+          if (selection.isValid &&
+              selection.start <= _controllers[i][j].text.length) {
             _controllers[i][j].selection = selection;
           }
         }
@@ -173,9 +179,8 @@ class _TableEditorState extends State<TableEditor> {
 
       rows.add(
         TableRow(
-          decoration: isHeader
-              ? BoxDecoration(color: Colors.grey.shade200)
-              : null,
+          decoration:
+              isHeader ? BoxDecoration(color: Colors.grey.shade200) : null,
           children: List.generate(
             _cells[i].length,
             (j) => TableCell(
@@ -263,7 +268,8 @@ class _TableEditorState extends State<TableEditor> {
   }
 
   void _removeColumn(int index) {
-    if (_cells.isEmpty || _cells[0].length <= 1) return; // Don't remove the last column
+    if (_cells.isEmpty || _cells[0].length <= 1)
+      return; // Don't remove the last column
 
     setState(() {
       for (var i = 0; i < _cells.length; i++) {

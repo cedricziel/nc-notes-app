@@ -108,7 +108,8 @@ class _HoverAwareEditorState extends State<HoverAwareEditor> {
               child: widget.formattedView,
             ),
             secondChild: widget.markdownView,
-            layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
+            layoutBuilder:
+                (topChild, topChildKey, bottomChild, bottomChildKey) {
               return Stack(
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,

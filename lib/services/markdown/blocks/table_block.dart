@@ -31,7 +31,8 @@ class TableBlock extends MarkdownBlock {
       if (line.startsWith('|') && line.endsWith('|')) {
         // Remove outer pipes and split by pipe
         final rowContent = line.substring(1, line.length - 1);
-        final rowCells = rowContent.split('|').map((cell) => cell.trim()).toList();
+        final rowCells =
+            rowContent.split('|').map((cell) => cell.trim()).toList();
         cells.add(rowCells);
       }
     }
@@ -51,7 +52,8 @@ class TableBlock extends MarkdownBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return TableEditor(
       initialCells: cells,
       initialHasHeader: hasHeader,
@@ -86,7 +88,8 @@ class TableBlock extends MarkdownBlock {
         return TableBlock.fromMarkdown(content);
       } else {
         // Just update the content, preserving the cells and hasHeader
-        return TableBlock(content: content, cells: this.cells, hasHeader: this.hasHeader);
+        return TableBlock(
+            content: content, cells: this.cells, hasHeader: this.hasHeader);
       }
     }
 

@@ -15,7 +15,7 @@ void main() {
 
     group('fromMarkdown', () {
       test('parses admonition block with type correctly', () {
-        const markdown = ':::info\nThis is an info admonition\n:::';
+        const markdown = ':::info\nThis is an info admonition';
         final block = AdmonitionBlock.fromMarkdown(markdown);
 
         expect(block.content, equals('This is an info admonition'));
@@ -23,7 +23,7 @@ void main() {
       });
 
       test('parses admonition block with empty type correctly', () {
-        const markdown = ':::\nThis is an admonition without type\n:::';
+        const markdown = ':::\nThis is an admonition without type';
         final block = AdmonitionBlock.fromMarkdown(markdown);
 
         expect(block.content, equals('This is an admonition without type'));
@@ -31,7 +31,7 @@ void main() {
       });
 
       test('handles multi-line admonition blocks', () {
-        const markdown = ':::warning\nLine 1\nLine 2\nLine 3\n:::';
+        const markdown = ':::warning\nLine 1\nLine 2\nLine 3';
         final block = AdmonitionBlock.fromMarkdown(markdown);
 
         expect(block.content, equals('Line 1\nLine 2\nLine 3'));
@@ -39,32 +39,25 @@ void main() {
       });
 
       test('handles admonition blocks with markdown content', () {
-        const markdown = ':::note\n**Bold text** and *italic text*\n:::';
+        const markdown = ':::note\n**Bold text** and *italic text*';
         final block = AdmonitionBlock.fromMarkdown(markdown);
 
         expect(block.content, equals('**Bold text** and *italic text*'));
         expect(block.type, equals('note'));
       });
-
-      test('handles malformed admonition blocks without closing marker', () {
-        const markdown = ':::info\nThis is an info admonition';
-        final block = AdmonitionBlock.fromMarkdown(markdown);
-
-        expect(block.content, equals('This is an info admonition'));
-        expect(block.type, equals('info'));
-      });
     });
 
     test('toMarkdown returns correctly formatted admonition block', () {
-      final block = AdmonitionBlock(content: 'This is a warning', type: 'warning');
+      final block =
+          AdmonitionBlock(content: 'This is a warning', type: 'warning');
 
-      expect(block.toMarkdown(), equals(':::warning\nThis is a warning\n:::'));
+      expect(block.toMarkdown(), equals(':::warning\nThis is a warning'));
     });
 
-    test('toMarkdown with empty type still includes markers', () {
+    test('toMarkdown with empty type still includes opening marker', () {
       final block = AdmonitionBlock(content: 'This is an admonition', type: '');
 
-      expect(block.toMarkdown(), equals(':::\nThis is an admonition\n:::'));
+      expect(block.toMarkdown(), equals(':::\nThis is an admonition'));
     });
 
     group('copyWith', () {
@@ -89,10 +82,11 @@ void main() {
 
       test('re-parses admonition block when content changes', () {
         const originalContent = 'Original admonition';
-        const newContent = ':::warning\nThis is a warning\n:::';
+        const newContent = ':::warning\nThis is a warning';
         const originalType = 'info';
 
-        final block = AdmonitionBlock(content: originalContent, type: originalType);
+        final block =
+            AdmonitionBlock(content: originalContent, type: originalType);
         final newBlock = block.copyWith(content: newContent);
 
         // Should re-parse the content as an admonition block
@@ -112,7 +106,9 @@ void main() {
       });
     });
 
-    testWidgets('buildEditor creates an admonition editor with content and type field', (WidgetTester tester) async {
+    testWidgets(
+        'buildEditor creates an admonition editor with content and type field',
+        (WidgetTester tester) async {
       const content = 'This is an admonition';
       const type = 'info';
       final block = AdmonitionBlock(content: content, type: type);
@@ -143,7 +139,9 @@ void main() {
       expect(find.text(type), findsOneWidget);
     });
 
-    testWidgets('buildPreview creates a styled container with admonition content', (WidgetTester tester) async {
+    testWidgets(
+        'buildPreview creates a styled container with admonition content',
+        (WidgetTester tester) async {
       const content = 'This is an admonition';
       const type = 'info';
       final block = AdmonitionBlock(content: content, type: type);
@@ -168,7 +166,8 @@ void main() {
       expect(find.text(type.toUpperCase()), findsOneWidget);
     });
 
-    test('_getAdmonitionColor returns appropriate color for different types', () {
+    test('_getAdmonitionColor returns appropriate color for different types',
+        () {
       final BuildContext context = _MockBuildContext();
 
       final infoBlock = AdmonitionBlock(content: 'Info', type: 'info');

@@ -11,7 +11,8 @@ abstract class MarkdownAwareBlock extends MarkdownBlock {
 
   /// Build an editor widget for this block that is aware of cursor focus
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged});
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged,
+      {bool isFocused = false, ValueChanged<bool>? onFocusChanged});
 
   /// Build a preview widget for this block
   @override
