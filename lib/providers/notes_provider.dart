@@ -615,7 +615,7 @@ class NotesProvider with ChangeNotifier {
         // Log first few blocks
         for (int i = 0; i < blocks.length && i < 3; i++) {
           final blockPreview = blocks[i].length > 30
-              ? blocks[i].substring(0, 30) + '...'
+              ? '${blocks[i].substring(0, 30)}...'
               : blocks[i];
           debugPrint('Server block $i: "$blockPreview"');
         }

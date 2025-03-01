@@ -100,7 +100,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
             backgroundColor: backgroundColor,
             appBar: AppBar(
               backgroundColor: backgroundColor,
-              leading: Container(
+              leading: SizedBox(
                 width: 60,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

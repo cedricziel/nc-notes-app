@@ -1,9 +1,6 @@
 import 'blocks/markdown_block.dart';
-import 'blocks/paragraph_block.dart';
-import 'blocks/heading_block.dart';
 import 'blocks/table_block.dart';
 import 'blocks/code_block.dart';
-import 'blocks/admonition_block.dart';
 import 'blocks/cursor_aware_paragraph_block.dart';
 import 'blocks/cursor_aware_heading_block.dart';
 import 'blocks/cursor_aware_admonition_block.dart';

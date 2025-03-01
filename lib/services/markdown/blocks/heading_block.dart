@@ -43,7 +43,7 @@ class HeadingBlock extends MarkdownBlock {
   }
 
   @override
-  String toMarkdown() => '#' * level + ' ' + content;
+  String toMarkdown() => '${'#' * level} $content';
 
   @override
   HeadingBlock copyWith({String? content}) {
@@ -134,7 +134,7 @@ class _HeadingEditorState extends State<HeadingEditor> {
                 setState(() {
                   _level = newLevel;
                 });
-                widget.onChanged('#' * newLevel + ' ' + _controller.text);
+                widget.onChanged('${'#' * newLevel} ${_controller.text}');
               }
             },
           ),
@@ -151,7 +151,7 @@ class _HeadingEditorState extends State<HeadingEditor> {
             ),
             style: _getHeadingStyle(context, _level),
             onChanged: (newContent) {
-              widget.onChanged('#' * _level + ' ' + newContent);
+              widget.onChanged('${'#' * _level} $newContent');
             },
           ),
         ),
