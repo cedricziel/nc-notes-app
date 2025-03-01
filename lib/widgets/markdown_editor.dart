@@ -5,6 +5,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
+import 'block_based_markdown_editor.dart';
 
 class MarkdownEditor extends StatefulWidget {
   final Note note;
@@ -21,7 +22,6 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   late FocusNode _contentFocusNode;
   Timer? _saveTimer;
   bool _hasUnsavedChanges = false;
-  bool _isPreviewMode = false;
 
   @override
   void initState() {
@@ -225,22 +225,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                   visualDensity: VisualDensity.compact,
                 ),
                 const SizedBox(width: 8),
-                IconButton(
-                  icon: Icon(
-                      _isPreviewMode
-                          ? Icons.edit_outlined
-                          : Icons.visibility_outlined,
-                      size: 18),
-                  tooltip: _isPreviewMode ? 'Edit' : 'Preview',
-                  onPressed: () {
-                    setState(() {
-                      _isPreviewMode = !_isPreviewMode;
-                    });
-                  },
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  visualDensity: VisualDensity.compact,
-                ),
+                // Preview mode is now handled by BlockBasedMarkdownEditor
                 const SizedBox(width: 16),
               ],
               bottom: PreferredSize(
@@ -285,63 +270,18 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                   ),
                 ),
 
-                // Content area - either editor or preview
+                // Content area - block-based markdown editor
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: _isPreviewMode
-                        ? Markdown(
-                            data: _contentController.text,
-                            styleSheet: MarkdownStyleSheet(
-                              p: TextStyle(
-                                fontSize: 14,
-                                color: textColor,
-                              ),
-                              h1: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
-                              h2: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
-                              h3: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
-                              code: TextStyle(
-                                backgroundColor: isDarkMode
-                                    ? Colors.grey[800]
-                                    : Colors.grey[200],
-                                fontFamily: 'SF Mono',
-                              ),
-                              blockquote: TextStyle(
-                                color: textColor.withOpacity(0.7),
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          )
-                        : TextField(
-                            controller: _contentController,
-                            focusNode: _contentFocusNode,
-                            decoration: InputDecoration(
-                              hintText: 'Note content',
-                              border: InputBorder.none,
-                              hintStyle:
-                                  TextStyle(color: textColor.withOpacity(0.6)),
-                            ),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: textColor,
-                            ),
-                            maxLines: null,
-                            expands: true,
-                            textAlignVertical: TextAlignVertical.top,
-                            onChanged: (_) => _saveNote(),
-                          ),
+                    child: BlockBasedMarkdownEditor(
+                      initialMarkdown: _contentController.text,
+                      onChanged: (newContent) {
+                        _contentController.text = newContent;
+                        _saveNote();
+                      },
+                      showBlockControls: true,
+                    ),
                   ),
                 ),
               ],
