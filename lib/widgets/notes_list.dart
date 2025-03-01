@@ -33,15 +33,8 @@ class NotesList extends StatelessWidget {
           backgroundColor: backgroundColor,
           appBar: AppBar(
             backgroundColor: backgroundColor,
-            title: Text(
-              notesProvider.selectedFolder?.name ?? 'All Notes',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: textColor,
-              ),
-            ),
             toolbarHeight: 36,
+            title: null, // Explicitly set title to null to remove it
             actions: [
               // List/Grid view toggle
               IconButton(
@@ -69,14 +62,7 @@ class NotesList extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
               ),
               const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                onPressed: () => notesProvider.addNote(),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                visualDensity: VisualDensity.compact,
-              ),
-              const SizedBox(width: 8),
+              // Removed new note button as it's moved to the right panel
             ],
           ),
           body: notes.isEmpty

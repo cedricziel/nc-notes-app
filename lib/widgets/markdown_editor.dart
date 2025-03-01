@@ -144,7 +144,8 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
       // Default: just insert the markdown syntax
       newText = text.replaceRange(
           selection.start, selection.end, '$markdownSyntax$textToInsert');
-      newCursorPosition = selection.start + markdownSyntax.length + textToInsert.length;
+      newCursorPosition =
+          selection.start + markdownSyntax.length + textToInsert.length;
     }
 
     // Update text controller
@@ -175,13 +176,15 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
             backgroundColor: backgroundColor,
             appBar: AppBar(
               backgroundColor: backgroundColor,
-              title: Text(
-                widget.note.title.isEmpty ? 'Untitled' : widget.note.title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                ),
+              leading: IconButton(
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                tooltip: 'New Note',
+                onPressed: () =>
+                    Provider.of<NotesProvider>(context, listen: false)
+                        .addNote(),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                visualDensity: VisualDensity.compact,
               ),
               toolbarHeight: 36,
               actions: [
@@ -223,7 +226,11 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(_isPreviewMode ? Icons.edit_outlined : Icons.visibility_outlined, size: 18),
+                  icon: Icon(
+                      _isPreviewMode
+                          ? Icons.edit_outlined
+                          : Icons.visibility_outlined,
+                      size: 18),
                   tooltip: _isPreviewMode ? 'Edit' : 'Preview',
                   onPressed: () {
                     setState(() {
@@ -240,7 +247,8 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                 preferredSize: const Size.fromHeight(24),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                  padding:
+                      const EdgeInsets.only(left: 16, right: 16, bottom: 8),
                   alignment: Alignment.centerRight,
                   child: Text(
                     formattedDate,
@@ -322,7 +330,8 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                             decoration: InputDecoration(
                               hintText: 'Note content',
                               border: InputBorder.none,
-                              hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
+                              hintStyle:
+                                  TextStyle(color: textColor.withOpacity(0.6)),
                             ),
                             style: TextStyle(
                               fontSize: 14,
