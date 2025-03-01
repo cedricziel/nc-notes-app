@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/notes_provider.dart';
-import 'screens/notes_screen.dart';
+import 'screens/responsive_notes_layout.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
 
@@ -26,8 +26,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => NotesProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => NotesProvider()),
+        ChangeNotifierProvider(create: (context) => MobileNavigationProvider()),
+      ],
       child: MaterialApp(
         title: 'Flutter Notes',
         debugShowCheckedModeBanner: false,
@@ -128,8 +131,8 @@ class MyApp extends StatelessWidget {
                     );
                   }
 
-                  // Show the notes screen once initialized
-                  return const NotesScreen();
+                  // Show the responsive notes layout once initialized
+                  return const ResponsiveNotesLayout();
                 },
               )
             : const LoginScreen(),

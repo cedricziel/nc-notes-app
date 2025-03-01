@@ -158,7 +158,7 @@ class FoldersSidebar extends StatelessWidget {
                             // Navigate to login screen, replacing the current screen
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                builder: (context) => const LoginScreen()),
+                                  builder: (context) => const LoginScreen()),
                             );
                           } else {
                             // Navigate to login screen
