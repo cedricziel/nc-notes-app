@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/folder.dart';
 import '../providers/notes_provider.dart';
 import '../screens/login_screen.dart';
+import 'sync_indicator.dart';
 
 class FoldersSidebar extends StatelessWidget {
   const FoldersSidebar({super.key});
@@ -110,15 +111,29 @@ class FoldersSidebar extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.refresh, size: 18),
-                        tooltip: 'Sync with server',
-                        onPressed: notesProvider.isAuthenticated
-                            ? () => notesProvider.syncWithServer()
-                            : null,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        visualDensity: VisualDensity.compact,
+                      // Sync button with animated indicator
+                      Consumer<NotesProvider>(
+                        builder: (context, provider, child) {
+                          // If syncing, show the animated indicator
+                          if (provider.isLoading || provider.isSaving) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: SyncIndicator(),
+                            );
+                          }
+
+                          // Otherwise show the regular sync button
+                          return IconButton(
+                            icon: const Icon(Icons.refresh, size: 18),
+                            tooltip: 'Sync with server',
+                            onPressed: provider.isAuthenticated
+                                ? () => provider.syncWithServer()
+                                : null,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            visualDensity: VisualDensity.compact,
+                          );
+                        },
                       ),
                       IconButton(
                         icon: Icon(

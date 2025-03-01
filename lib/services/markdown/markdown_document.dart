@@ -4,6 +4,9 @@ import 'blocks/heading_block.dart';
 import 'blocks/table_block.dart';
 import 'blocks/code_block.dart';
 import 'blocks/admonition_block.dart';
+import 'blocks/hover_aware_paragraph_block.dart';
+import 'blocks/hover_aware_heading_block.dart';
+import 'blocks/hover_aware_admonition_block.dart';
 
 /// Represents a markdown document as a collection of blocks.
 class MarkdownDocument {
@@ -128,14 +131,14 @@ class MarkdownDocument {
 
     // Check for admonition block
     if (trimmedMarkdown.startsWith(':::')) {
-      return AdmonitionBlock.fromMarkdown(trimmedMarkdown);
+      return HoverAwareAdmonitionBlock.fromMarkdown(trimmedMarkdown);
     }
 
     // Check for heading
     if (trimmedMarkdown.startsWith('#')) {
       final match = RegExp(r'^(#{1,6})\s+(.+)$').firstMatch(trimmedMarkdown);
       if (match != null) {
-        return HeadingBlock.fromMarkdown(trimmedMarkdown);
+        return HoverAwareHeadingBlock.fromMarkdown(trimmedMarkdown);
       }
     }
 
@@ -145,7 +148,7 @@ class MarkdownDocument {
     }
 
     // Default to paragraph
-    return ParagraphBlock(content: trimmedMarkdown);
+    return HoverAwareParagraphBlock(content: trimmedMarkdown);
   }
 
   /// Split markdown into logical blocks.

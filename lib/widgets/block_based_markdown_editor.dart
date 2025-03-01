@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/markdown/markdown_document.dart';
 import '../services/markdown/blocks/markdown_block.dart';
-import '../services/markdown/blocks/paragraph_block.dart';
+import '../services/markdown/blocks/hover_aware_paragraph_block.dart';
 
 class BlockBasedMarkdownEditor extends StatefulWidget {
   final String initialMarkdown;
@@ -39,7 +39,39 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
 
   void _updateBlock(int index, String newContent) {
     setState(() {
-      final updatedBlock = _document.blocks[index].copyWith(content: newContent);
+      final currentBlock = _document.blocks[index];
+      MarkdownBlock updatedBlock;
+
+      // Check if the block type should change based on content
+      final trimmedContent = newContent.trim();
+
+      // If content starts with #, convert to heading
+      if (trimmedContent.startsWith('#')) {
+        final match = RegExp(r'^(#{1,6})\s+(.+)$').firstMatch(trimmedContent);
+        if (match != null) {
+          print('Converting block to heading: $trimmedContent');
+          updatedBlock = MarkdownDocument.createBlockFromMarkdown(trimmedContent);
+        } else {
+          // If it doesn't match heading pattern, just update content
+          updatedBlock = currentBlock.copyWith(content: newContent);
+        }
+      }
+      // If content starts with :::, convert to admonition
+      else if (trimmedContent.startsWith(':::')) {
+        print('Converting block to admonition: $trimmedContent');
+        updatedBlock = MarkdownDocument.createBlockFromMarkdown(trimmedContent);
+      }
+      // Otherwise, if it was an admonition or heading, convert to paragraph
+      else if (currentBlock.runtimeType.toString().contains('Admonition') ||
+               currentBlock.runtimeType.toString().contains('Heading')) {
+        print('Converting block to paragraph: $trimmedContent');
+        updatedBlock = MarkdownDocument.createBlockFromMarkdown(trimmedContent);
+      }
+      // Otherwise, just update content
+      else {
+        updatedBlock = currentBlock.copyWith(content: newContent);
+      }
+
       final newBlocks = List<MarkdownBlock>.from(_document.blocks);
       newBlocks[index] = updatedBlock;
 
@@ -56,6 +88,11 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
       _document = MarkdownDocument(blocks: newBlocks);
       widget.onChanged(_document.toMarkdown());
     });
+  }
+
+  // Helper method to create a new empty block
+  MarkdownBlock _createEmptyBlock() {
+    return HoverAwareParagraphBlock(content: '');
   }
 
   void _removeBlock(int index) {
@@ -112,59 +149,7 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
       itemBuilder: (context, index) {
         final block = _document.blocks[index];
 
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          elevation: 0,
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.grey[850]
-              : Colors.grey[50],
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Block controls
-              if (widget.showBlockControls)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        block.runtimeType.toString().replaceAll('Block', ''),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.add, size: 16),
-                        onPressed: () => _addBlockAfter(index, ParagraphBlock(content: '')),
-                        tooltip: 'Add block below',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.delete, size: 16),
-                        onPressed: () => _removeBlock(index),
-                        tooltip: 'Remove block',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ],
-                  ),
-                ),
-
-              // Block editor
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: block.buildEditor(
-                  context,
-                  (newContent) => _updateBlock(index, newContent),
-                ),
-              ),
-            ],
-          ),
-        );
+        return _buildBlockCard(context, block, index);
       },
     );
   }
@@ -179,6 +164,100 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
           child: block.buildPreview(context),
         );
       },
+    );
+  }
+
+  // Build a card for a block with hover-aware controls
+  Widget _buildBlockCard(BuildContext context, MarkdownBlock block, int index) {
+    return MouseRegion(
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        elevation: 0,
+        color: Colors.transparent, // Make transparent to better see hover effects
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Block controls (shown on hover)
+            if (widget.showBlockControls)
+              _BlockControls(
+                blockType: block.runtimeType.toString().replaceAll('Block', ''),
+                onAddBlock: () => _addBlockAfter(index, _createEmptyBlock()),
+                onRemoveBlock: () => _removeBlock(index),
+              ),
+
+            // Block editor
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: block.buildEditor(
+                context,
+                (newContent) => _updateBlock(index, newContent),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Widget for block controls that appear on hover
+class _BlockControls extends StatefulWidget {
+  final String blockType;
+  final VoidCallback onAddBlock;
+  final VoidCallback onRemoveBlock;
+
+  const _BlockControls({
+    required this.blockType,
+    required this.onAddBlock,
+    required this.onRemoveBlock,
+  });
+
+  @override
+  State<_BlockControls> createState() => _BlockControlsState();
+}
+
+class _BlockControlsState extends State<_BlockControls> {
+  bool _isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: AnimatedOpacity(
+        opacity: _isHovering ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 200),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                widget.blockType,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.add, size: 16),
+                onPressed: widget.onAddBlock,
+                tooltip: 'Add block below',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                visualDensity: VisualDensity.compact,
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.delete, size: 16),
+                onPressed: widget.onRemoveBlock,
+                tooltip: 'Remove block',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

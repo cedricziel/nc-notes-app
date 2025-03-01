@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
+import 'sync_indicator.dart';
 
 class NotesList extends StatelessWidget {
   const NotesList({super.key});
@@ -64,6 +65,9 @@ class NotesList extends StatelessWidget {
                 constraints: const BoxConstraints(),
                 visualDensity: VisualDensity.compact,
               ),
+              const SizedBox(width: 8),
+              // Sync indicator
+              const SyncIndicator(),
               const SizedBox(width: 8),
               // Removed new note button as it's moved to the right panel
             ],

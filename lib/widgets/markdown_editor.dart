@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import 'block_based_markdown_editor.dart';
+import 'sync_indicator.dart';
 
 class MarkdownEditor extends StatefulWidget {
   final Note note;
@@ -184,16 +185,27 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
             backgroundColor: backgroundColor,
             appBar: AppBar(
               backgroundColor: backgroundColor,
-              leading: IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                tooltip: 'New Note',
-                onPressed: () =>
-                    Provider.of<NotesProvider>(context, listen: false)
-                        .addNote(),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                visualDensity: VisualDensity.compact,
+              leading: Container(
+                width: 60,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      tooltip: 'New Note',
+                      onPressed: () =>
+                          Provider.of<NotesProvider>(context, listen: false)
+                              .addNote(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    // Sync indicator next to the pencil icon
+                    const SyncIndicator(),
+                  ],
+                ),
               ),
+              leadingWidth: 60, // Adjust width to fit both icons
               toolbarHeight: 36,
               actions: [
                 // Toolbar icons
@@ -232,8 +244,6 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                   constraints: const BoxConstraints(),
                   visualDensity: VisualDensity.compact,
                 ),
-                const SizedBox(width: 8),
-                // Preview mode is now handled by BlockBasedMarkdownEditor
                 const SizedBox(width: 16),
               ],
               bottom: PreferredSize(

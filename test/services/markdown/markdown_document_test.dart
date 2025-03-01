@@ -5,6 +5,9 @@ import 'package:flutter_notes/services/markdown/blocks/heading_block.dart';
 import 'package:flutter_notes/services/markdown/blocks/code_block.dart';
 import 'package:flutter_notes/services/markdown/blocks/admonition_block.dart';
 import 'package:flutter_notes/services/markdown/blocks/table_block.dart';
+import 'package:flutter_notes/services/markdown/blocks/hover_aware_paragraph_block.dart';
+import 'package:flutter_notes/services/markdown/blocks/hover_aware_heading_block.dart';
+import 'package:flutter_notes/services/markdown/blocks/hover_aware_admonition_block.dart';
 
 void main() {
   group('MarkdownDocument', () {
@@ -32,7 +35,7 @@ void main() {
         final document = MarkdownDocument.fromMarkdown(markdown);
 
         expect(document.blocks.length, equals(1));
-        expect(document.blocks[0], isA<ParagraphBlock>());
+        expect(document.blocks[0], isA<HoverAwareParagraphBlock>());
         expect(document.blocks[0].content, equals('This is a paragraph'));
       });
 
@@ -41,8 +44,8 @@ void main() {
         final document = MarkdownDocument.fromMarkdown(markdown);
 
         expect(document.blocks.length, equals(1));
-        expect(document.blocks[0], isA<HeadingBlock>());
-        expect((document.blocks[0] as HeadingBlock).level, equals(2));
+        expect(document.blocks[0], isA<HoverAwareHeadingBlock>());
+        expect((document.blocks[0] as HoverAwareHeadingBlock).level, equals(2));
         expect(document.blocks[0].content, equals('This is a heading'));
       });
 
@@ -61,8 +64,8 @@ void main() {
         final document = MarkdownDocument.fromMarkdown(markdown);
 
         expect(document.blocks.length, equals(1));
-        expect(document.blocks[0], isA<AdmonitionBlock>());
-        expect((document.blocks[0] as AdmonitionBlock).type, equals('info'));
+        expect(document.blocks[0], isA<HoverAwareAdmonitionBlock>());
+        expect((document.blocks[0] as HoverAwareAdmonitionBlock).type, equals('info'));
         expect(document.blocks[0].content, equals('This is an info admonition'));
       });
 
@@ -83,10 +86,10 @@ void main() {
         final document = MarkdownDocument.fromMarkdown(markdown);
 
         expect(document.blocks.length, equals(5));
-        expect(document.blocks[0], isA<HeadingBlock>());
-        expect(document.blocks[1], isA<ParagraphBlock>());
+        expect(document.blocks[0], isA<HoverAwareHeadingBlock>());
+        expect(document.blocks[1], isA<HoverAwareParagraphBlock>());
         expect(document.blocks[2], isA<CodeBlock>());
-        expect(document.blocks[3], isA<AdmonitionBlock>());
+        expect(document.blocks[3], isA<HoverAwareAdmonitionBlock>());
         expect(document.blocks[4], isA<TableBlock>());
       });
 
@@ -97,8 +100,8 @@ void main() {
 
         // Should still be parsed as two separate blocks
         expect(document.blocks.length, equals(2));
-        expect(document.blocks[0], isA<HeadingBlock>());
-        expect(document.blocks[1], isA<ParagraphBlock>());
+        expect(document.blocks[0], isA<HoverAwareHeadingBlock>());
+        expect(document.blocks[1], isA<HoverAwareParagraphBlock>());
       });
 
       test('handles adjacent blocks of the same type', () {
@@ -107,9 +110,9 @@ void main() {
         final document = MarkdownDocument.fromMarkdown(markdown);
 
         expect(document.blocks.length, equals(2));
-        expect(document.blocks[0], isA<ParagraphBlock>());
+        expect(document.blocks[0], isA<HoverAwareParagraphBlock>());
         expect(document.blocks[0].content, equals('Paragraph 1'));
-        expect(document.blocks[1], isA<ParagraphBlock>());
+        expect(document.blocks[1], isA<HoverAwareParagraphBlock>());
         expect(document.blocks[1].content, equals('Paragraph 2'));
       });
 
@@ -238,29 +241,42 @@ void main() {
 
         expect(reparsedDocument.blocks.length, equals(originalDocument.blocks.length));
 
+        // Check content but not runtime type since we now use hover-aware blocks
         for (var i = 0; i < originalDocument.blocks.length; i++) {
-          expect(reparsedDocument.blocks[i].runtimeType, equals(originalDocument.blocks[i].runtimeType));
           expect(reparsedDocument.blocks[i].content, equals(originalDocument.blocks[i].content));
+
+          // Check specific properties based on block type
+          if (originalDocument.blocks[i] is HeadingBlock) {
+            expect(reparsedDocument.blocks[i], isA<HoverAwareHeadingBlock>());
+            expect((reparsedDocument.blocks[i] as HoverAwareHeadingBlock).level,
+                   equals((originalDocument.blocks[i] as HeadingBlock).level));
+          } else if (originalDocument.blocks[i] is AdmonitionBlock) {
+            expect(reparsedDocument.blocks[i], isA<HoverAwareAdmonitionBlock>());
+            expect((reparsedDocument.blocks[i] as HoverAwareAdmonitionBlock).type,
+                   equals((originalDocument.blocks[i] as AdmonitionBlock).type));
+          } else if (originalDocument.blocks[i] is ParagraphBlock) {
+            expect(reparsedDocument.blocks[i], isA<HoverAwareParagraphBlock>());
+          }
         }
       });
     });
 
     group('createBlockFromMarkdown', () {
-      test('creates paragraph block for plain text', () {
+      test('creates hover-aware paragraph block for plain text', () {
         const markdown = 'This is a paragraph';
         final block = MarkdownDocument.createBlockFromMarkdown(markdown);
 
-        expect(block, isA<ParagraphBlock>());
+        expect(block, isA<HoverAwareParagraphBlock>());
         expect(block.content, equals(markdown));
       });
 
-      test('creates heading block for heading text', () {
+      test('creates hover-aware heading block for heading text', () {
         const markdown = '## This is a heading';
         final block = MarkdownDocument.createBlockFromMarkdown(markdown);
 
-        expect(block, isA<HeadingBlock>());
+        expect(block, isA<HoverAwareHeadingBlock>());
         expect(block.content, equals('This is a heading'));
-        expect((block as HeadingBlock).level, equals(2));
+        expect((block as HoverAwareHeadingBlock).level, equals(2));
       });
 
       test('creates code block for code fence', () {
@@ -272,13 +288,13 @@ void main() {
         expect((block as CodeBlock).language, equals('javascript'));
       });
 
-      test('creates admonition block for admonition marker', () {
+      test('creates hover-aware admonition block for admonition marker', () {
         const markdown = ':::info\nThis is an info admonition\n:::';
         final block = MarkdownDocument.createBlockFromMarkdown(markdown);
 
-        expect(block, isA<AdmonitionBlock>());
+        expect(block, isA<HoverAwareAdmonitionBlock>());
         expect(block.content, equals('This is an info admonition'));
-        expect((block as AdmonitionBlock).type, equals('info'));
+        expect((block as HoverAwareAdmonitionBlock).type, equals('info'));
       });
 
       test('creates table block for table markdown', () {
@@ -326,7 +342,7 @@ void main() {
 
         expect(document.blocks.length, equals(3));
         expect(document.blocks[0].content, equals('Paragraph'));
-        expect(document.blocks[1], isA<AdmonitionBlock>());
+        expect(document.blocks[1], isA<HoverAwareAdmonitionBlock>());
         expect(document.blocks[1].content, equals('Line 1\n\nLine 2'));
         expect(document.blocks[2].content, equals('Another paragraph'));
       });
@@ -381,14 +397,14 @@ void main() {
         final document = MarkdownDocument.fromMarkdown(markdown);
 
         expect(document.blocks.length, equals(8));
-        expect(document.blocks[0], isA<HeadingBlock>());
-        expect(document.blocks[1], isA<ParagraphBlock>()); // Quote is treated as paragraph
-        expect(document.blocks[2], isA<ParagraphBlock>()); // List is treated as paragraph
-        expect(document.blocks[3], isA<ParagraphBlock>()); // Ordered list is treated as paragraph
+        expect(document.blocks[0], isA<HoverAwareHeadingBlock>());
+        expect(document.blocks[1], isA<HoverAwareParagraphBlock>()); // Quote is treated as paragraph
+        expect(document.blocks[2], isA<HoverAwareParagraphBlock>()); // List is treated as paragraph
+        expect(document.blocks[3], isA<HoverAwareParagraphBlock>()); // Ordered list is treated as paragraph
         expect(document.blocks[4], isA<TableBlock>());
         expect(document.blocks[5], isA<CodeBlock>());
-        expect(document.blocks[6], isA<AdmonitionBlock>());
-        expect(document.blocks[7], isA<ParagraphBlock>()); // Regular paragraph
+        expect(document.blocks[6], isA<HoverAwareAdmonitionBlock>());
+        expect(document.blocks[7], isA<HoverAwareParagraphBlock>()); // Regular paragraph
       });
     });
   });
