@@ -25,7 +25,7 @@ class HoverAwareHeadingBlock extends MarkdownAwareBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return HoverAwareHeadingEditor(
       initialContent: content,
       initialLevel: level,

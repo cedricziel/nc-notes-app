@@ -52,7 +52,7 @@ class CodeBlock extends MarkdownBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return CodeEditor(
       initialContent: content,
       initialLanguage: language,

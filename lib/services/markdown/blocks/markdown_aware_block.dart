@@ -9,9 +9,9 @@ import 'markdown_block.dart';
 abstract class MarkdownAwareBlock extends MarkdownBlock {
   const MarkdownAwareBlock({required super.content});
 
-  /// Build an editor widget for this block that is aware of hover and focus states
+  /// Build an editor widget for this block that is aware of cursor focus
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged);
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged});
 
   /// Build a preview widget for this block
   @override

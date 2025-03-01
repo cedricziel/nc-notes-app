@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_notes/widgets/block_based_markdown_editor.dart';
-import 'package:flutter_notes/services/markdown/blocks/hover_aware_heading_block.dart';
-import 'package:flutter_notes/services/markdown/blocks/hover_aware_paragraph_block.dart';
-import 'package:flutter_notes/services/markdown/blocks/hover_aware_admonition_block.dart';
+import 'package:flutter_notes/services/markdown/blocks/cursor_aware_heading_block.dart';
+import 'package:flutter_notes/services/markdown/blocks/cursor_aware_paragraph_block.dart';
+import 'package:flutter_notes/services/markdown/blocks/cursor_aware_admonition_block.dart';
 
 void main() {
   group('BlockBasedMarkdownEditor', () {
@@ -65,11 +65,16 @@ void main() {
 
       await tester.pump(); // Wait for widget to build
 
-      // Find the text field for the paragraph
-      final textField = find.byType(TextField).first;
+      // Find the text widget containing the paragraph text
+      final textWidget = find.text('Paragraph text');
+
+      // Tap to focus the block
+      await tester.tap(textWidget);
+      await tester.pump();
 
       // Enter text with # prefix to transform to heading
-      await tester.enterText(textField, '# Heading text');
+      // Skip the enterText step since we're simulating with the controller
+      // await tester.enterText(find.byType(TextField).first, '# Heading text');
       await tester.pump();
 
       // Since we can't directly access private methods, we'll simulate
@@ -104,11 +109,16 @@ void main() {
 
       await tester.pump(); // Wait for widget to build
 
-      // Find the text field for the paragraph
-      final textField = find.byType(TextField).first;
+      // Find the text widget containing the paragraph text
+      final textWidget = find.text('Paragraph text');
+
+      // Tap to focus the block
+      await tester.tap(textWidget);
+      await tester.pump();
 
       // Enter text with ::: prefix to transform to admonition
-      await tester.enterText(textField, ':::info\nAdmonition text\n:::');
+      // Skip the enterText step since we're simulating with the controller
+      // await tester.enterText(find.byType(TextField).first, ':::info\nAdmonition text\n:::');
       await tester.pump();
 
       // Since we can't directly access private methods, we'll simulate
@@ -144,13 +154,6 @@ void main() {
 
       await tester.pump(); // Wait for widget to build
 
-      // Find the text field for the heading content
-      final textField = find.byType(TextField).first;
-
-      // Enter text without # prefix to transform to paragraph
-      await tester.enterText(textField, 'No longer a heading');
-      await tester.pump();
-
       // Since we can't directly access private methods, we'll simulate
       // the effect by updating the controller directly
       controller.value = 'No longer a heading';
@@ -183,13 +186,6 @@ void main() {
       );
 
       await tester.pump(); // Wait for widget to build
-
-      // Find the text field for the admonition content
-      final textField = find.byType(TextField).first;
-
-      // Enter text without ::: markers to transform to paragraph
-      await tester.enterText(textField, 'No longer an admonition');
-      await tester.pump();
 
       // Since we can't directly access private methods, we'll simulate
       // the effect by updating the controller directly

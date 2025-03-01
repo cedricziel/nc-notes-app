@@ -52,7 +52,7 @@ class AdmonitionBlock extends MarkdownBlock {
   }
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return AdmonitionEditor(
       initialContent: content,
       initialType: type,

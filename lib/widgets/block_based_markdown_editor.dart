@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/markdown/markdown_document.dart';
 import '../services/markdown/blocks/markdown_block.dart';
-import '../services/markdown/blocks/hover_aware_paragraph_block.dart';
+import '../services/markdown/blocks/cursor_aware_paragraph_block.dart';
 
 class BlockBasedMarkdownEditor extends StatefulWidget {
   final String initialMarkdown;
@@ -22,6 +22,7 @@ class BlockBasedMarkdownEditor extends StatefulWidget {
 class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
   late MarkdownDocument _document;
   bool _isPreviewMode = false;
+  int _focusedBlockIndex = -1; // No block focused initially
 
   @override
   void initState() {
@@ -92,7 +93,7 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
 
   // Helper method to create a new empty block
   MarkdownBlock _createEmptyBlock() {
-    return HoverAwareParagraphBlock(content: '');
+    return CursorAwareParagraphBlock(content: '');
   }
 
   void _removeBlock(int index) {
@@ -167,41 +168,49 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
     );
   }
 
-  // Build a card for a block with hover-aware controls
+  // Build a card for a block with cursor-aware controls
   Widget _buildBlockCard(BuildContext context, MarkdownBlock block, int index) {
-    return MouseRegion(
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        elevation: 0,
-        color: Colors.transparent, // Make transparent to better see hover effects
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Block controls (shown on hover)
-            if (widget.showBlockControls)
-              _BlockControls(
-                blockType: block.runtimeType.toString().replaceAll('Block', ''),
-                onAddBlock: () => _addBlockAfter(index, _createEmptyBlock()),
-                onRemoveBlock: () => _removeBlock(index),
-              ),
+    final isFocused = index == _focusedBlockIndex;
 
-            // Block editor
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: block.buildEditor(
-                context,
-                (newContent) => _updateBlock(index, newContent),
-              ),
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      elevation: 0,
+      color: Colors.transparent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Block controls
+          if (widget.showBlockControls)
+            _BlockControls(
+              blockType: block.runtimeType.toString().replaceAll('Block', ''),
+              onAddBlock: () => _addBlockAfter(index, _createEmptyBlock()),
+              onRemoveBlock: () => _removeBlock(index),
             ),
-          ],
-        ),
+
+          // Block editor
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: block.buildEditor(
+              context,
+              (newContent) => _updateBlock(index, newContent),
+              isFocused: isFocused,
+              onFocusChanged: (focused) {
+                if (focused) {
+                  setState(() {
+                    _focusedBlockIndex = index;
+                  });
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// Widget for block controls that appear on hover
-class _BlockControls extends StatefulWidget {
+// Widget for block controls
+class _BlockControls extends StatelessWidget {
   final String blockType;
   final VoidCallback onAddBlock;
   final VoidCallback onRemoveBlock;
@@ -213,50 +222,35 @@ class _BlockControls extends StatefulWidget {
   });
 
   @override
-  State<_BlockControls> createState() => _BlockControlsState();
-}
-
-class _BlockControlsState extends State<_BlockControls> {
-  bool _isHovering = false;
-
-  @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      child: AnimatedOpacity(
-        opacity: _isHovering ? 1.0 : 0.0,
-        duration: const Duration(milliseconds: 200),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                widget.blockType,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.add, size: 16),
-                onPressed: widget.onAddBlock,
-                tooltip: 'Add block below',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                visualDensity: VisualDensity.compact,
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.delete, size: 16),
-                onPressed: widget.onRemoveBlock,
-                tooltip: 'Remove block',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                visualDensity: VisualDensity.compact,
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            blockType,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
-        ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.add, size: 16),
+            onPressed: onAddBlock,
+            tooltip: 'Add block below',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            visualDensity: VisualDensity.compact,
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.delete, size: 16),
+            onPressed: onRemoveBlock,
+            tooltip: 'Remove block',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            visualDensity: VisualDensity.compact,
+          ),
+        ],
       ),
     );
   }

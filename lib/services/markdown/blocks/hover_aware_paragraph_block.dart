@@ -7,7 +7,7 @@ class HoverAwareParagraphBlock extends MarkdownAwareBlock {
   const HoverAwareParagraphBlock({required super.content});
 
   @override
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged) {
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged}) {
     return HoverAwareParagraphEditor(
       initialContent: content,
       onChanged: onChanged,

@@ -8,7 +8,7 @@ abstract class MarkdownBlock {
   const MarkdownBlock({required this.content});
 
   /// Build an editor widget for this block
-  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged);
+  Widget buildEditor(BuildContext context, ValueChanged<String> onChanged, {bool isFocused = false, ValueChanged<bool>? onFocusChanged});
 
   /// Build a preview widget for this block
   Widget buildPreview(BuildContext context);
