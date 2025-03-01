@@ -19,10 +19,10 @@ class PlatformBackButton extends StatelessWidget {
 
   /// Creates a platform-aware back button.
   const PlatformBackButton({
-    Key? key,
+    super.key,
     this.onPressed,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

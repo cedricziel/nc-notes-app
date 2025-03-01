@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import 'platform_service.dart';
 
 /// A platform-aware text field widget that uses either a [CupertinoTextField]
@@ -44,7 +43,7 @@ class PlatformTextField extends StatelessWidget {
 
   /// Creates a platform-aware text field.
   const PlatformTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.decoration,
     this.placeholder,
@@ -56,7 +55,7 @@ class PlatformTextField extends StatelessWidget {
     this.enabled = true,
     this.autofocus = false,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/notes_provider.dart';
 import 'notes_screen.dart';
 import 'mobile/mobile_folders_screen.dart';
-import 'mobile/mobile_notes_screen.dart';
-import 'mobile/mobile_editor_screen.dart';
 
 /// A responsive layout that shows either a multi-pane layout on large screens
 /// or a single-screen layout with navigation on small screens (like mobile devices).

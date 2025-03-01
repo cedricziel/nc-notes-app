@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
 import '../services/auth_service.dart';
 import '../services/nextcloud_auth_service.dart';
 import '../main.dart';

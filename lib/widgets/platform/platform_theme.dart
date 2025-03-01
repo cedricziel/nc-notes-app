@@ -27,7 +27,7 @@ class PlatformTheme {
     if (isCupertino(context)) {
       return CupertinoColors.systemBackground.resolveFrom(context);
     } else {
-      return Theme.of(context).colorScheme.background;
+      return Theme.of(context).colorScheme.surface;
     }
   }
 

@@ -7,7 +7,6 @@ import 'sync_indicator.dart';
 import 'platform/platform_tag.dart';
 import 'platform/platform_list_tile.dart';
 import 'platform/platform_text_field.dart';
-import 'platform/platform_button.dart';
 
 class FoldersSidebar extends StatelessWidget {
   const FoldersSidebar({super.key});

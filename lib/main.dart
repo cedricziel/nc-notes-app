@@ -7,7 +7,6 @@ import 'screens/responsive_notes_layout.dart';
 import 'screens/login_screen.dart';
 import 'services/auth_service.dart';
 import 'widgets/platform/platform_service.dart';
-import 'widgets/platform/platform_theme.dart';
 
 void main() async {
   // Ensure Flutter is initialized
@@ -82,7 +81,7 @@ class MyApp extends StatelessWidget {
       ),
       scrollbarTheme: ScrollbarThemeData(
         radius: const Radius.circular(10),
-        thickness: MaterialStateProperty.all(6),
+        thickness: WidgetStateProperty.all(6),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
@@ -130,7 +129,7 @@ class MyApp extends StatelessWidget {
       ),
       scrollbarTheme: ScrollbarThemeData(
         radius: const Radius.circular(10),
-        thickness: MaterialStateProperty.all(6),
+        thickness: WidgetStateProperty.all(6),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(

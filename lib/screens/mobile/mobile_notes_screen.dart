@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import '../../models/note.dart';
 import '../../providers/notes_provider.dart';
 import '../../widgets/sync_indicator.dart';
-import '../../widgets/platform/platform_scaffold.dart';
 import '../../widgets/platform/platform_app_bar.dart';
 import '../../widgets/platform/platform_list_tile.dart';
 import 'mobile_editor_screen.dart';

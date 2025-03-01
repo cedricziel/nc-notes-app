@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import '../../providers/notes_provider.dart';
 import '../../models/folder.dart';
-import '../responsive_notes_layout.dart';
 import '../login_screen.dart';
 import '../../widgets/sync_indicator.dart';
 import '../../widgets/platform/platform_tag.dart';
@@ -11,7 +10,6 @@ import '../../widgets/platform/platform_scaffold.dart';
 import '../../widgets/platform/platform_app_bar.dart';
 import '../../widgets/platform/platform_list_tile.dart';
 import '../../widgets/platform/platform_text_field.dart';
-import '../../widgets/platform/platform_button.dart';
 import 'mobile_notes_screen.dart';
 
 /// Mobile version of the folders screen.

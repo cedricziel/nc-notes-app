@@ -31,13 +31,13 @@ class PlatformButton extends StatelessWidget {
 
   /// Creates a platform-aware button.
   const PlatformButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.child,
     this.color,
     this.padding,
     this.filled = true,
-  }) : super(key: key);
+  });
 
   /// Creates a platform-aware button with text.
   factory PlatformButton.text({

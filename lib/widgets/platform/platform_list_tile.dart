@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import 'platform_service.dart';
 
 /// A platform-aware list tile widget that uses either a [CupertinoListTile]
@@ -48,7 +47,7 @@ class PlatformListTile extends StatelessWidget {
 
   /// Creates a platform-aware list tile.
   const PlatformListTile({
-    Key? key,
+    super.key,
     this.title,
     this.leading,
     this.trailing,
@@ -61,7 +60,7 @@ class PlatformListTile extends StatelessWidget {
     this.dense,
     this.visualDensity,
     this.minLeadingWidth,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

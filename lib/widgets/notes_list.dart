@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import 'sync_indicator.dart';
 import 'platform/platform_scaffold.dart';
 import 'platform/platform_app_bar.dart';
 import 'platform/platform_list_tile.dart';
-import 'platform/platform_text_field.dart';
-import 'platform/platform_button.dart';
 
 class NotesList extends StatelessWidget {
   const NotesList({super.key});

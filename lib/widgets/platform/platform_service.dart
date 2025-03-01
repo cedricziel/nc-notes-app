@@ -1,6 +1,5 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 /// A service to detect the current platform and provide platform-specific utilities.
 /// This is a thin wrapper around flutter_platform_widgets' platform detection.
