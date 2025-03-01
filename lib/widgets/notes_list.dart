@@ -4,6 +4,11 @@ import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import 'sync_indicator.dart';
+import 'platform/platform_scaffold.dart';
+import 'platform/platform_app_bar.dart';
+import 'platform/platform_list_tile.dart';
+import 'platform/platform_text_field.dart';
+import 'platform/platform_button.dart';
 
 class NotesList extends StatelessWidget {
   const NotesList({super.key});
@@ -31,11 +36,10 @@ class NotesList extends StatelessWidget {
         final oldestNotes =
             notes.where((note) => note.updatedAt.isBefore(last30Days)).toList();
 
-        return Scaffold(
+        return PlatformScaffold(
           backgroundColor: backgroundColor,
-          appBar: AppBar(
+          appBar: PlatformAppBar(
             backgroundColor: backgroundColor,
-            toolbarHeight: 36,
             title: null, // Explicitly set title to null to remove it
             actions: [
               // List/Grid view toggle
@@ -151,7 +155,7 @@ class NotesList extends StatelessWidget {
           ),
         ),
       ),
-      child: ListTile(
+      child: PlatformListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         minLeadingWidth: 0,
         leading: Column(
@@ -217,7 +221,7 @@ class NotesList extends StatelessWidget {
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
+          PlatformListTile(
             leading: const Icon(Icons.folder),
             title: const Text('Move to Folder'),
             onTap: () {
@@ -225,7 +229,7 @@ class NotesList extends StatelessWidget {
               _showMoveFolderDialog(context, note);
             },
           ),
-          ListTile(
+          PlatformListTile(
             leading: const Icon(Icons.delete),
             title: const Text('Delete'),
             onTap: () {
@@ -251,7 +255,7 @@ class NotesList extends StatelessWidget {
             shrinkWrap: true,
             children: [
               // No folder option
-              ListTile(
+              PlatformListTile(
                 leading: const Icon(Icons.notes),
                 title: const Text('No Folder'),
                 selected: note.folder == null,
@@ -264,7 +268,7 @@ class NotesList extends StatelessWidget {
               const Divider(),
 
               // Folders list
-              ...notesProvider.folders.map((folder) => ListTile(
+              ...notesProvider.folders.map((folder) => PlatformListTile(
                     leading: const Icon(Icons.folder),
                     title: Text(folder.name),
                     selected: note.folder == folder.id,

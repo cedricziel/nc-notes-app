@@ -214,35 +214,48 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
 
         // The actual editable text field (invisible layer for editing)
         Positioned.fill(
-          child: TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            maxLines: null,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
+          child: Material(
+            type: MaterialType.transparency, // Make it visually transparent
+            child: TextField(
+              controller: _controller,
+              focusNode: _focusNode,
+              maxLines: null,
+              // Use iOS keyboard appearance on iOS
+              keyboardAppearance: Theme.of(context).brightness == Brightness.dark
+                  ? Brightness.dark
+                  : Brightness.light,
+              // Enable scrolling physics for the text field
+              scrollPhysics: Theme.of(context).platform == TargetPlatform.iOS
+                  ? const BouncingScrollPhysics()
+                  : const ClampingScrollPhysics(),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: const TextStyle(
+                color: Colors.transparent, // Make text invisible
+                height: 1.5, // Match line height with rendered blocks
+              ),
+              // Ensure cursor is visible even though text is transparent
+              cursorColor:
+                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+              onTap: () {
+                // Update cursor position when tapped
+                _updateCursorBlockIndex();
+              },
             ),
-            style: const TextStyle(
-              color: Colors.transparent, // Make text invisible
-              height: 1.5, // Match line height with rendered blocks
-            ),
-            // Ensure cursor is visible even though text is transparent
-            cursorColor:
-                Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
-            onTap: () {
-              // Update cursor position when tapped
-              _updateCursorBlockIndex();
-            },
           ),
         ),
 
-        // Gesture detector to handle taps on blocks
+        // Gesture detector to handle taps and scrolling on blocks
         Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTapDown: (details) {
               _handleTapOnRenderedBlocks(details);
             },
+            // We don't add any other gesture handlers here because we want
+            // the ListView to handle scrolling gestures naturally
             child: Container(
               color: Colors.transparent,
             ),
@@ -253,8 +266,16 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
   }
 
   Widget _buildRenderedBlocks() {
+    // Check if we're running on iOS to use appropriate scrolling physics
+    final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
     return ListView.builder(
       controller: _scrollController,
+      // Use iOS-style bouncing physics on iOS
+      physics: isIOS
+          ? const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+          : const ClampingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
       itemCount: _document.blocks.length,
       itemBuilder: (context, index) {
         final block = _document.blocks[index];
@@ -367,8 +388,16 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
   }
 
   Widget _buildPreviewMode() {
+    // Check if we're running on iOS to use appropriate scrolling physics
+    final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
     return ListView.builder(
       controller: _scrollController,
+      // Use iOS-style bouncing physics on iOS
+      physics: isIOS
+          ? const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+          : const ClampingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
       itemCount: _document.blocks.length,
       itemBuilder: (context, index) {
         final block = _document.blocks[index];

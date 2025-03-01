@@ -3,6 +3,11 @@ import 'dart:io' show Platform;
 import '../services/auth_service.dart';
 import '../services/nextcloud_auth_service.dart';
 import '../main.dart';
+import '../widgets/platform/platform_scaffold.dart';
+import '../widgets/platform/platform_app_bar.dart';
+import '../widgets/platform/platform_service.dart';
+import '../widgets/platform/platform_text_field.dart';
+import '../widgets/platform/platform_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -121,11 +126,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMacOS = Platform.isMacOS;
+    final bool isMacOS = PlatformService.isMacOS;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login to Nextcloud'),
+    return PlatformScaffold(
+      appBar: const PlatformAppBar(
+        title: Text('Login to Nextcloud'),
       ),
       body: Padding(
         padding:
@@ -156,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
           textAlign: TextAlign.center,
         ),
         SizedBox(height: isMacOS ? 30 : 20),
-        TextField(
+        PlatformTextField(
           controller: _serverController,
           decoration: const InputDecoration(
             labelText: 'Server URL',
@@ -164,33 +169,28 @@ class _LoginScreenState extends State<LoginScreen> {
             border: OutlineInputBorder(),
             prefixIcon: Icon(Icons.cloud),
           ),
+          placeholder: 'https://yournextcloud.com',
           keyboardType: TextInputType.url,
-          textInputAction: TextInputAction.go,
           onSubmitted: (_) {
             if (_serverController.text.isNotEmpty) {
               _startLoginFlow();
             }
           },
           enabled: !_isLoading,
-          // Explicitly enable text selection and paste functionality
-          enableInteractiveSelection: true,
-          // Disable autocorrect and suggestions which can interfere with pasting URLs
-          autocorrect: false,
-          enableSuggestions: false,
-          // Use default context menu to ensure paste option is available
-          contextMenuBuilder: (context, editableTextState) {
-            return AdaptiveTextSelectionToolbar.editableText(
-              editableTextState: editableTextState,
-            );
-          },
         ),
         SizedBox(height: isMacOS ? 30 : 20),
         SizedBox(
           width: isMacOS ? 200 : double.infinity,
-          child: ElevatedButton.icon(
+          child: PlatformButton(
             onPressed: (_hasServerUrl && !_isLoading) ? _startLoginFlow : null,
-            icon: const Icon(Icons.login),
-            label: const Text('Login with Browser'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.login),
+                const SizedBox(width: 8),
+                const Text('Login with Browser'),
+              ],
+            ),
           ),
         ),
         if (_isLoading) ...[

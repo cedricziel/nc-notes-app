@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import '../../models/note.dart';
 import '../../providers/notes_provider.dart';
 import '../../widgets/sync_indicator.dart';
+import '../../widgets/platform/platform_scaffold.dart';
+import '../../widgets/platform/platform_app_bar.dart';
+import '../../widgets/platform/platform_list_tile.dart';
 import 'mobile_editor_screen.dart';
 
 /// Mobile version of the notes list screen.
@@ -80,9 +83,9 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
         final oldestNotes =
             notes.where((note) => note.updatedAt.isBefore(last30Days)).toList();
 
-        return Scaffold(
+        return PlatformScaffold(
           backgroundColor: backgroundColor,
-          appBar: AppBar(
+          appBar: PlatformAppBar(
             title: Text(title),
             backgroundColor: backgroundColor,
             actions: [
@@ -193,7 +196,7 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
           ),
         ),
       ),
-      child: ListTile(
+      child: PlatformListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         minLeadingWidth: 0,
         leading: Column(
@@ -266,7 +269,7 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
+          PlatformListTile(
             leading: const Icon(Icons.folder),
             title: const Text('Move to Folder'),
             onTap: () {
@@ -274,7 +277,7 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
               _showMoveFolderDialog(context, note);
             },
           ),
-          ListTile(
+          PlatformListTile(
             leading: const Icon(Icons.delete),
             title: const Text('Delete'),
             onTap: () {
@@ -300,7 +303,7 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
             shrinkWrap: true,
             children: [
               // No folder option
-              ListTile(
+              PlatformListTile(
                 leading: const Icon(Icons.notes),
                 title: const Text('No Folder'),
                 selected: note.folder == null,
@@ -313,7 +316,7 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
               const Divider(),
 
               // Folders list
-              ...notesProvider.folders.map((folder) => ListTile(
+              ...notesProvider.folders.map((folder) => PlatformListTile(
                     leading: const Icon(Icons.folder),
                     title: Text(folder.name),
                     selected: note.folder == folder.id,

@@ -4,6 +4,10 @@ import '../models/folder.dart';
 import '../providers/notes_provider.dart';
 import '../screens/login_screen.dart';
 import 'sync_indicator.dart';
+import 'platform/platform_tag.dart';
+import 'platform/platform_list_tile.dart';
+import 'platform/platform_text_field.dart';
+import 'platform/platform_button.dart';
 
 class FoldersSidebar extends StatelessWidget {
   const FoldersSidebar({super.key});
@@ -264,7 +268,7 @@ class FoldersSidebar extends StatelessWidget {
     final textColor = isDarkMode ? Colors.white : Colors.black;
     final selectedColor = Theme.of(context).colorScheme.primary;
 
-    return ListTile(
+    return PlatformListTile(
       leading: Icon(
         icon,
         size: 18,
@@ -302,27 +306,22 @@ class FoldersSidebar extends StatelessWidget {
     final textColor = isDarkMode ? Colors.white : Colors.black;
     final selectedColor = Theme.of(context).colorScheme.primary;
 
-    return GestureDetector(
+    return PlatformTag(
+      label: tag,
+      isSelected: isSelected,
       onTap: onTap,
-      child: Chip(
-        label: Text(
-          tag,
-          style: TextStyle(
-            fontSize: 12,
-            color: isSelected ? selectedColor : textColor,
-          ),
-        ),
-        backgroundColor: isDarkMode
-            ? (isSelected
-                ? const Color(0xFF3D3D3D).withOpacity(0.7)
-                : const Color(0xFF3D3D3D))
-            : (isSelected
-                ? const Color(0xFFE5E5E5).withOpacity(0.7)
-                : const Color(0xFFE5E5E5)),
-        visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-        padding: EdgeInsets.zero,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: -2),
+      labelStyle: TextStyle(
+        fontSize: 12,
+        color: isSelected ? selectedColor : textColor,
       ),
+      backgroundColor: isDarkMode
+          ? (isSelected
+              ? const Color(0xFF3D3D3D).withOpacity(0.7)
+              : const Color(0xFF3D3D3D))
+          : (isSelected
+              ? const Color(0xFFE5E5E5).withOpacity(0.7)
+              : const Color(0xFFE5E5E5)),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: -2),
     );
   }
 
@@ -333,12 +332,13 @@ class FoldersSidebar extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('New Folder'),
-        content: TextField(
+        content: PlatformTextField(
           controller: textController,
           autofocus: true,
           decoration: const InputDecoration(
             hintText: 'Folder name',
           ),
+          placeholder: 'Folder name',
         ),
         actions: [
           TextButton(
@@ -367,7 +367,7 @@ class FoldersSidebar extends StatelessWidget {
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
+          PlatformListTile(
             leading: const Icon(Icons.edit),
             title: const Text('Rename'),
             onTap: () {
@@ -375,7 +375,7 @@ class FoldersSidebar extends StatelessWidget {
               _showRenameFolderDialog(context, folder);
             },
           ),
-          ListTile(
+          PlatformListTile(
             leading: const Icon(Icons.delete),
             title: const Text('Delete'),
             onTap: () {
@@ -395,12 +395,13 @@ class FoldersSidebar extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Rename Folder'),
-        content: TextField(
+        content: PlatformTextField(
           controller: textController,
           autofocus: true,
           decoration: const InputDecoration(
             hintText: 'Folder name',
           ),
+          placeholder: 'Folder name',
         ),
         actions: [
           TextButton(

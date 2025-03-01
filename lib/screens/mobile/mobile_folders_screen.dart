@@ -5,6 +5,13 @@ import '../../models/folder.dart';
 import '../responsive_notes_layout.dart';
 import '../login_screen.dart';
 import '../../widgets/sync_indicator.dart';
+import '../../widgets/platform/platform_tag.dart';
+import '../../widgets/platform/platform_scaffold.dart';
+import '../../widgets/platform/platform_app_bar.dart';
+import '../../widgets/platform/platform_bottom_app_bar.dart';
+import '../../widgets/platform/platform_list_tile.dart';
+import '../../widgets/platform/platform_text_field.dart';
+import '../../widgets/platform/platform_button.dart';
 import 'mobile_notes_screen.dart';
 
 /// Mobile version of the folders screen.
@@ -19,9 +26,9 @@ class MobileFoldersScreen extends StatelessWidget {
         final isDarkMode = Theme.of(context).brightness == Brightness.dark;
         final backgroundColor = Theme.of(context).colorScheme.surface;
 
-        return Scaffold(
+        return PlatformScaffold(
           backgroundColor: backgroundColor,
-          appBar: AppBar(
+          appBar: PlatformAppBar(
             title: const Text('Nextcloud Notes'),
             backgroundColor: backgroundColor,
             actions: [
@@ -152,7 +159,7 @@ class MobileFoldersScreen extends StatelessWidget {
               const SizedBox(height: 20),
             ],
           ),
-          bottomNavigationBar: BottomAppBar(
+          bottomNavigationBar: PlatformBottomAppBar(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -268,7 +275,7 @@ class MobileFoldersScreen extends StatelessWidget {
     final textColor = isDarkMode ? Colors.white : Colors.black;
     final selectedColor = Theme.of(context).colorScheme.primary;
 
-    return ListTile(
+    return PlatformListTile(
       leading: Icon(
         icon,
         color: isSelected ? selectedColor : textColor.withOpacity(0.7),
@@ -303,25 +310,22 @@ class MobileFoldersScreen extends StatelessWidget {
     final textColor = isDarkMode ? Colors.white : Colors.black;
     final selectedColor = Theme.of(context).colorScheme.primary;
 
-    return GestureDetector(
+    return PlatformTag(
+      label: tag,
+      isSelected: isSelected,
       onTap: onTap,
-      child: Chip(
-        label: Text(
-          tag,
-          style: TextStyle(
-            fontSize: 14,
-            color: isSelected ? selectedColor : textColor,
-          ),
-        ),
-        backgroundColor: isDarkMode
-            ? (isSelected
-                ? const Color(0xFF3D3D3D).withOpacity(0.7)
-                : const Color(0xFF3D3D3D))
-            : (isSelected
-                ? const Color(0xFFE5E5E5).withOpacity(0.7)
-                : const Color(0xFFE5E5E5)),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      labelStyle: TextStyle(
+        fontSize: 14,
+        color: isSelected ? selectedColor : textColor,
       ),
+      backgroundColor: isDarkMode
+          ? (isSelected
+              ? const Color(0xFF3D3D3D).withOpacity(0.7)
+              : const Color(0xFF3D3D3D))
+          : (isSelected
+              ? const Color(0xFFE5E5E5).withOpacity(0.7)
+              : const Color(0xFFE5E5E5)),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
     );
   }
 
@@ -332,12 +336,13 @@ class MobileFoldersScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('New Folder'),
-        content: TextField(
+        content: PlatformTextField(
           controller: textController,
           autofocus: true,
           decoration: const InputDecoration(
             hintText: 'Folder name',
           ),
+          placeholder: 'Folder name',
         ),
         actions: [
           TextButton(
@@ -366,7 +371,7 @@ class MobileFoldersScreen extends StatelessWidget {
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
+          PlatformListTile(
             leading: const Icon(Icons.edit),
             title: const Text('Rename'),
             onTap: () {
@@ -374,7 +379,7 @@ class MobileFoldersScreen extends StatelessWidget {
               _showRenameFolderDialog(context, folder);
             },
           ),
-          ListTile(
+          PlatformListTile(
             leading: const Icon(Icons.delete),
             title: const Text('Delete'),
             onTap: () {
@@ -394,12 +399,13 @@ class MobileFoldersScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Rename Folder'),
-        content: TextField(
+        content: PlatformTextField(
           controller: textController,
           autofocus: true,
           decoration: const InputDecoration(
             hintText: 'Folder name',
           ),
+          placeholder: 'Folder name',
         ),
         actions: [
           TextButton(
