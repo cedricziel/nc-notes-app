@@ -148,9 +148,17 @@ class FoldersSidebar extends StatelessWidget {
                           if (notesProvider.isAuthenticated) {
                             // Logout
                             await notesProvider.logout();
+
+                            // Show success message
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                   content: Text('Logged out successfully')),
+                            );
+
+                            // Navigate to login screen, replacing the current screen
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen()),
                             );
                           } else {
                             // Navigate to login screen

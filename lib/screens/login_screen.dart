@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import '../services/auth_service.dart';
 import '../services/nextcloud_auth_service.dart';
+import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -84,7 +85,19 @@ class _LoginScreenState extends State<LoginScreen> {
         await Future.delayed(const Duration(milliseconds: 500));
 
         if (mounted) {
-          Navigator.of(context).pop(true); // Return success
+          // Check if we can pop (if there's a screen to go back to)
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop(true); // Return success
+          } else {
+            // If we can't pop, we need to rebuild the app from scratch
+            // This happens when we've used pushReplacement to get to the login screen
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => const MyApp(isAuthenticated: true),
+              ),
+              (route) => false,
+            );
+          }
         }
       } else if (mounted) {
         debugPrint('Login failed or timed out');
@@ -159,6 +172,17 @@ class _LoginScreenState extends State<LoginScreen> {
             }
           },
           enabled: !_isLoading,
+          // Explicitly enable text selection and paste functionality
+          enableInteractiveSelection: true,
+          // Disable autocorrect and suggestions which can interfere with pasting URLs
+          autocorrect: false,
+          enableSuggestions: false,
+          // Use default context menu to ensure paste option is available
+          contextMenuBuilder: (context, editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
         ),
         SizedBox(height: isMacOS ? 30 : 20),
         SizedBox(
