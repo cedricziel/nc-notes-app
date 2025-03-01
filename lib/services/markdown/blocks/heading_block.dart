@@ -25,44 +25,10 @@ class HeadingBlock extends MarkdownBlock {
 
   @override
   Widget buildEditor(BuildContext context, ValueChanged<String> onChanged) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Heading level indicator
-        Container(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: DropdownButton<int>(
-            value: level,
-            items: List.generate(6, (index) => index + 1)
-                .map((l) => DropdownMenuItem<int>(
-                      value: l,
-                      child: Text('H$l'),
-                    ))
-                .toList(),
-            onChanged: (newLevel) {
-              if (newLevel != null) {
-                onChanged('#' * newLevel + ' ' + content);
-              }
-            },
-          ),
-        ),
-
-        // Heading content
-        Expanded(
-          child: TextField(
-            controller: TextEditingController(text: content),
-            maxLines: null,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.zero,
-            ),
-            style: _getHeadingStyle(context, level),
-            onChanged: (newContent) {
-              onChanged('#' * level + ' ' + newContent);
-            },
-          ),
-        ),
-      ],
+    return HeadingEditor(
+      initialContent: content,
+      initialLevel: level,
+      onChanged: onChanged,
     );
   }
 
@@ -92,6 +58,103 @@ class HeadingBlock extends MarkdownBlock {
 
     // If the format doesn't match a heading, keep the level but update content
     return HeadingBlock(content: content, level: level);
+  }
+}
+
+class HeadingEditor extends StatefulWidget {
+  final String initialContent;
+  final int initialLevel;
+  final ValueChanged<String> onChanged;
+
+  const HeadingEditor({
+    super.key,
+    required this.initialContent,
+    required this.initialLevel,
+    required this.onChanged,
+  });
+
+  @override
+  State<HeadingEditor> createState() => _HeadingEditorState();
+}
+
+class _HeadingEditorState extends State<HeadingEditor> {
+  late TextEditingController _controller;
+  late int _level;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialContent);
+    _level = widget.initialLevel;
+  }
+
+  @override
+  void didUpdateWidget(HeadingEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialContent != widget.initialContent) {
+      // Update text without recreating controller to preserve cursor position
+      final currentCursor = _controller.selection;
+      _controller.text = widget.initialContent;
+      // Restore cursor position if it was valid
+      if (currentCursor.isValid && currentCursor.start <= _controller.text.length) {
+        _controller.selection = currentCursor;
+      }
+    }
+    if (oldWidget.initialLevel != widget.initialLevel) {
+      _level = widget.initialLevel;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Heading level indicator
+        Container(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: DropdownButton<int>(
+            value: _level,
+            items: List.generate(6, (index) => index + 1)
+                .map((l) => DropdownMenuItem<int>(
+                      value: l,
+                      child: Text('H$l'),
+                    ))
+                .toList(),
+            onChanged: (newLevel) {
+              if (newLevel != null) {
+                setState(() {
+                  _level = newLevel;
+                });
+                widget.onChanged('#' * newLevel + ' ' + _controller.text);
+              }
+            },
+          ),
+        ),
+
+        // Heading content
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            maxLines: null,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+            ),
+            style: _getHeadingStyle(context, _level),
+            onChanged: (newContent) {
+              widget.onChanged('#' * _level + ' ' + newContent);
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   // Helper to get appropriate text style for heading level

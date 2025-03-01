@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class TableEditor extends StatefulWidget {
-  final List<List<String>> cells;
-  final bool hasHeader;
+  final List<List<String>> initialCells;
+  final bool initialHasHeader;
   final Function(List<List<String>>, bool) onChanged;
 
   const TableEditor({
     super.key,
-    required this.cells,
-    required this.hasHeader,
+    required this.initialCells,
+    required this.initialHasHeader,
     required this.onChanged,
   });
 
@@ -19,21 +19,77 @@ class TableEditor extends StatefulWidget {
 class _TableEditorState extends State<TableEditor> {
   late List<List<String>> _cells;
   late bool _hasHeader;
+  late List<List<TextEditingController>> _controllers;
 
   @override
   void initState() {
     super.initState();
-    _cells = List.from(widget.cells.map((row) => List<String>.from(row)));
-    _hasHeader = widget.hasHeader;
+    _cells = List.from(widget.initialCells.map((row) => List<String>.from(row)));
+    _hasHeader = widget.initialHasHeader;
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    _controllers = [];
+    for (var i = 0; i < _cells.length; i++) {
+      final rowControllers = <TextEditingController>[];
+      for (var j = 0; j < _cells[i].length; j++) {
+        rowControllers.add(TextEditingController(text: _cells[i][j]));
+      }
+      _controllers.add(rowControllers);
+    }
   }
 
   @override
   void didUpdateWidget(TableEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.cells != widget.cells || oldWidget.hasHeader != widget.hasHeader) {
-      _cells = List.from(widget.cells.map((row) => List<String>.from(row)));
-      _hasHeader = widget.hasHeader;
+    if (oldWidget.initialCells != widget.initialCells ||
+        oldWidget.initialHasHeader != widget.initialHasHeader) {
+
+      // Store current cursor positions
+      final cursorPositions = <List<TextSelection>>[];
+      for (var i = 0; i < _controllers.length; i++) {
+        final rowSelections = <TextSelection>[];
+        for (var j = 0; j < _controllers[i].length; j++) {
+          rowSelections.add(_controllers[i][j].selection);
+        }
+        cursorPositions.add(rowSelections);
+      }
+
+      // Update cells and header
+      _cells = List.from(widget.initialCells.map((row) => List<String>.from(row)));
+      _hasHeader = widget.initialHasHeader;
+
+      // Dispose old controllers
+      for (var row in _controllers) {
+        for (var controller in row) {
+          controller.dispose();
+        }
+      }
+
+      // Create new controllers
+      _initializeControllers();
+
+      // Restore cursor positions where possible
+      for (var i = 0; i < _controllers.length && i < cursorPositions.length; i++) {
+        for (var j = 0; j < _controllers[i].length && j < cursorPositions[i].length; j++) {
+          final selection = cursorPositions[i][j];
+          if (selection.isValid && selection.start <= _controllers[i][j].text.length) {
+            _controllers[i][j].selection = selection;
+          }
+        }
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    for (var row in _controllers) {
+      for (var controller in row) {
+        controller.dispose();
+      }
+    }
+    super.dispose();
   }
 
   @override
@@ -127,7 +183,7 @@ class _TableEditorState extends State<TableEditor> {
                 padding: const EdgeInsets.all(4.0),
                 child: IntrinsicWidth(
                   child: TextField(
-                    controller: TextEditingController(text: _cells[i][j]),
+                    controller: _controllers[i][j],
                     decoration: const InputDecoration(
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8),
@@ -157,10 +213,18 @@ class _TableEditorState extends State<TableEditor> {
       if (_cells.isEmpty) {
         // If table is empty, add a row with one cell
         _cells.add(['']);
+        _controllers.add([TextEditingController(text: '')]);
       } else {
         // Add a row with the same number of columns
         final newRow = List<String>.filled(_cells[0].length, '');
         _cells.add(newRow);
+
+        // Add controllers for the new row
+        final newRowControllers = <TextEditingController>[];
+        for (var i = 0; i < newRow.length; i++) {
+          newRowControllers.add(TextEditingController(text: ''));
+        }
+        _controllers.add(newRowControllers);
       }
       widget.onChanged(_cells, _hasHeader);
     });
@@ -171,10 +235,12 @@ class _TableEditorState extends State<TableEditor> {
       if (_cells.isEmpty) {
         // If table is empty, add a row with one cell
         _cells.add(['']);
+        _controllers.add([TextEditingController(text: '')]);
       } else {
         // Add a column to each row
-        for (final row in _cells) {
-          row.add('');
+        for (var i = 0; i < _cells.length; i++) {
+          _cells[i].add('');
+          _controllers[i].add(TextEditingController(text: ''));
         }
       }
       widget.onChanged(_cells, _hasHeader);
@@ -185,7 +251,13 @@ class _TableEditorState extends State<TableEditor> {
     if (_cells.length <= 1) return; // Don't remove the last row
 
     setState(() {
+      // Dispose controllers for the removed row
+      for (var controller in _controllers[index]) {
+        controller.dispose();
+      }
+
       _cells.removeAt(index);
+      _controllers.removeAt(index);
       widget.onChanged(_cells, _hasHeader);
     });
   }
@@ -194,8 +266,12 @@ class _TableEditorState extends State<TableEditor> {
     if (_cells.isEmpty || _cells[0].length <= 1) return; // Don't remove the last column
 
     setState(() {
-      for (final row in _cells) {
-        row.removeAt(index);
+      for (var i = 0; i < _cells.length; i++) {
+        // Dispose controller for the removed cell
+        _controllers[i][index].dispose();
+
+        _cells[i].removeAt(index);
+        _controllers[i].removeAt(index);
       }
       widget.onChanged(_cells, _hasHeader);
     });

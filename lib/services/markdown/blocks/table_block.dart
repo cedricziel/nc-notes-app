@@ -53,8 +53,8 @@ class TableBlock extends MarkdownBlock {
   @override
   Widget buildEditor(BuildContext context, ValueChanged<String> onChanged) {
     return TableEditor(
-      cells: cells,
-      hasHeader: hasHeader,
+      initialCells: cells,
+      initialHasHeader: hasHeader,
       onChanged: (newCells, newHasHeader) {
         final newContent = _generateMarkdownTable(newCells, newHasHeader);
         onChanged(newContent);
@@ -78,9 +78,16 @@ class TableBlock extends MarkdownBlock {
   TableBlock copyWith({String? content}) {
     if (content == null) return this;
 
-    // If content has changed, re-parse the table
+    // If content has changed
     if (content != this.content) {
-      return TableBlock.fromMarkdown(content);
+      // Check if the content looks like a markdown table
+      if (content.trim().startsWith('|') && content.contains('|')) {
+        // Re-parse as a markdown table
+        return TableBlock.fromMarkdown(content);
+      } else {
+        // Just update the content, preserving the cells and hasHeader
+        return TableBlock(content: content, cells: this.cells, hasHeader: this.hasHeader);
+      }
     }
 
     return this;

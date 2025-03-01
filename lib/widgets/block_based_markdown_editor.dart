@@ -63,10 +63,16 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
 
     setState(() {
       final newBlocks = List<MarkdownBlock>.from(_document.blocks);
+      final removedBlock = newBlocks[index];
+      print('Removing block at index $index: ${removedBlock.runtimeType}');
+      print('Block content before removal: "${removedBlock.content}"');
+
       newBlocks.removeAt(index);
 
       _document = MarkdownDocument(blocks: newBlocks);
-      widget.onChanged(_document.toMarkdown());
+      final newMarkdown = _document.toMarkdown();
+      print('Markdown after block removal: "$newMarkdown"');
+      widget.onChanged(newMarkdown);
     });
   }
 

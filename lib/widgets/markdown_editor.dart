@@ -60,17 +60,24 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   void _saveNote() {
     _hasUnsavedChanges = true;
 
+    // Debug logging for content changes
+    print('Content changed, scheduling save: ${_contentController.text.length} characters');
+
     // Cancel any pending save operation
     _saveTimer?.cancel();
 
     // Start a new timer
     _saveTimer = Timer(const Duration(seconds: 5), () {
+      print('Debounce timer expired, saving note');
       _saveNoteImmediately();
     });
   }
 
   // Save immediately without debounce
   void _saveNoteImmediately() {
+    print('Saving note immediately, content length: ${_contentController.text.length}');
+    print('Content preview: "${_contentController.text.substring(0, _contentController.text.length > 100 ? 100 : _contentController.text.length)}..."');
+
     final notesProvider = Provider.of<NotesProvider>(context, listen: false);
     notesProvider.updateNote(
       widget.note.id,
@@ -78,6 +85,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
       content: _contentController.text,
     );
     _hasUnsavedChanges = false;
+    print('Note saved to provider');
   }
 
   // Insert markdown formatting at cursor position

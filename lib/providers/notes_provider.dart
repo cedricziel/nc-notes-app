@@ -151,6 +151,12 @@ class NotesProvider with ChangeNotifier {
     // Log the current ETag before update
     debugPrint('Current note ETag before update: ${currentNote.etag}');
 
+    // Debug logging for content update
+    if (content != null) {
+      debugPrint('Updating note content, length: ${content.length}');
+      debugPrint('Content preview: "${content.substring(0, content.length > 100 ? 100 : content.length)}..."');
+    }
+
     // Extract tags if content is updated
     List<String> tags = currentNote.tags;
     if (content != null) {
@@ -180,10 +186,12 @@ class NotesProvider with ChangeNotifier {
 
     // Save to local storage
     await _saveLocalData();
+    debugPrint('Note saved to local storage');
 
     // Queue the note for server update if authenticated
     if (_api != null) {
       // Queue the content update
+      debugPrint('Queueing note for server update');
       queueCommand(id, 'content');
     } else {
       debugPrint('Not authenticated, note saved locally only');
@@ -258,6 +266,10 @@ class NotesProvider with ChangeNotifier {
     }
 
     final note = _notes[index];
+
+    // Debug logging for content being saved to server
+    debugPrint('Preparing to save note to server, content length: ${note.content.length}');
+    debugPrint('Content preview: "${note.content.substring(0, note.content.length > 100 ? 100 : note.content.length)}..."');
 
     // Mark note as not having save error
     if (note.saveError) {
@@ -560,17 +572,46 @@ class NotesProvider with ChangeNotifier {
     setState(loading: true, error: null);
     debugPrint('Starting sync with Nextcloud server...');
 
+    // Log the current state of local notes before sync
+    debugPrint('Local notes before sync: ${_notes.length} notes');
+    for (final note in _notes) {
+      if (note.id.isNotEmpty) {
+        debugPrint('Local note ID: ${note.id}, Content length: ${note.content.length}');
+        debugPrint('Content preview: "${note.content.substring(0, note.content.length > 50 ? 50 : note.content.length)}..."');
+
+        // Count blocks in the content
+        final blocks = note.content.split('\n\n');
+        debugPrint('Block count: ${blocks.length}');
+
+        // Log first few blocks
+        for (int i = 0; i < blocks.length && i < 3; i++) {
+          final blockPreview = blocks[i].length > 30 ? blocks[i].substring(0, 30) + '...' : blocks[i];
+          debugPrint('Block $i: "$blockPreview"');
+        }
+      }
+    }
+
     try {
       // Fetch notes from server
       debugPrint('Fetching notes from server...');
       final serverNotes = await _api!.getNotes();
       debugPrint('Received ${serverNotes.length} notes from server');
 
-      // Log ETags for debugging
+      // Log ETags and content details for debugging
       for (final note in serverNotes) {
-        debugPrint('Server note ID: ${note.id}, ETag: ${note.etag}');
+        debugPrint('Server note ID: ${note.id}, ETag: ${note.etag}, Content length: ${note.content.length}');
         if (note.etag == null || note.etag!.isEmpty) {
           debugPrint('Warning: Note ${note.id} has no ETag from server');
+        }
+
+        // Count blocks in the server content
+        final blocks = note.content.split('\n\n');
+        debugPrint('Server note block count: ${blocks.length}');
+
+        // Log first few blocks
+        for (int i = 0; i < blocks.length && i < 3; i++) {
+          final blockPreview = blocks[i].length > 30 ? blocks[i].substring(0, 30) + '...' : blocks[i];
+          debugPrint('Server block $i: "$blockPreview"');
         }
       }
 
@@ -589,18 +630,46 @@ class NotesProvider with ChangeNotifier {
       }
 
       // Update local notes with server notes, ensuring each has a reference copy
+      debugPrint('Processing server notes for local storage...');
       final processedServerNotes = serverNotes.map((note) {
         // Extract tags from content
         final tags = extractTags(note.content);
 
+        // Log the processing of each note
+        debugPrint('Processing server note ID: ${note.id}');
+
+        // Count blocks in the content before processing
+        final blocksBeforeProcessing = note.content.split('\n\n');
+        debugPrint('Blocks before processing: ${blocksBeforeProcessing.length}');
+
         // Create a reference copy for each server note with tags
-        return note.copyWith(
+        final processedNote = note.copyWith(
           tags: tags,
           reference: note.createReference(),
         );
+
+        // Count blocks after processing to check for any changes
+        final blocksAfterProcessing = processedNote.content.split('\n\n');
+        debugPrint('Blocks after processing: ${blocksAfterProcessing.length}');
+
+        // Check if the block count changed during processing
+        if (blocksBeforeProcessing.length != blocksAfterProcessing.length) {
+          debugPrint('WARNING: Block count changed during processing!');
+          debugPrint('Before: ${blocksBeforeProcessing.length}, After: ${blocksAfterProcessing.length}');
+        }
+
+        return processedNote;
       }).toList();
 
+      // Log the state before updating the notes collection
+      debugPrint('Before updating notes collection: ${_notes.length} local notes');
+
+      // Update the notes collection with processed server notes and local-only notes
       _notes = [...processedServerNotes, ...localOnlyNotes];
+
+      // Log the state after updating the notes collection
+      debugPrint('After updating notes collection: ${_notes.length} total notes');
+      debugPrint('Processed server notes: ${processedServerNotes.length}, Local-only notes: ${localOnlyNotes.length}');
 
       // Extract folders from notes
       final folderNames = <String>{};
@@ -812,6 +881,9 @@ class NotesProvider with ChangeNotifier {
         // Fetch the latest version of the note from the server
         final serverNote = await _fetchNoteFromServer(noteId);
 
+        // Debug logging for conflict resolution
+        debugPrint('Comparing local content (${content.length} chars) with server content (${serverNote.content.length} chars)');
+
         // Implement TypeScript-like conflict resolution
         if (serverNote.content == content) {
           // Content is already up-to-date, just update with server's metadata
@@ -841,9 +913,11 @@ class NotesProvider with ChangeNotifier {
             serverNote.content == reference.content) {
           // Remote content has not changed from our reference, retry with new etag
           debugPrint(
-              'Server content has not changed, retrying update with new etag');
+              'Server content has not changed from reference, retrying update with new etag');
+          debugPrint('Reference content length: ${reference.content.length} chars');
 
           // Retry the update with the new etag
+          debugPrint('Retrying update with new ETag: ${serverNote.etag}');
           return await _api!.updateNote(
             id: noteId,
             title: title,
@@ -852,9 +926,57 @@ class NotesProvider with ChangeNotifier {
             favorite: favorite,
             etag: serverNote.etag,
           );
-        } else {
+        } else if (reference != null) {
+          // Check if our local content is shorter than the reference
+          // This could indicate a block deletion
+          if (content.length < reference.content.length) {
+            debugPrint('Local content is shorter than reference, likely a block deletion');
+
+            // Check if the server content is the same as our reference
+            // This would mean the server hasn't changed since our last sync
+            if (_isContentSimilarEnough(serverNote.content, reference.content)) {
+              debugPrint('Server content is similar to reference, applying our deletion');
+
+              // Retry the update with the new etag to apply our deletion
+              debugPrint('Retrying update with new ETag to apply deletion: ${serverNote.etag}');
+              return await _api!.updateNote(
+                id: noteId,
+                title: title,
+                content: content, // Our content with the deletion
+                category: category,
+                favorite: favorite,
+                etag: serverNote.etag,
+              );
+            }
+          }
+
+          // Log content differences for debugging
+          debugPrint('Local content length: ${content.length}, Reference content length: ${reference.content.length}, Server content length: ${serverNote.content.length}');
+
           // Both local and server content have changed, manual resolution required
           debugPrint('Content conflict detected, manual resolution required');
+          debugPrint('Local content differs from server content and reference');
+
+          // Store the conflict for manual resolution
+          final noteWithConflict = note.copyWith(
+            conflict: serverNote,
+          );
+
+          _notes[index] = noteWithConflict;
+
+          // Update selected note if needed
+          if (_selectedNote?.id == noteId.toString()) {
+            _selectedNote = noteWithConflict;
+          }
+
+          // Save to local storage
+          await _saveLocalData();
+
+          throw Exception('Note update conflict. Manual resolution required.');
+        } else {
+          // No reference available, can't determine if this is a deletion
+          // Default to manual conflict resolution
+          debugPrint('No reference available, defaulting to manual conflict resolution');
 
           // Store the conflict for manual resolution
           final noteWithConflict = note.copyWith(
@@ -894,5 +1016,49 @@ class NotesProvider with ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  /// Helper method to determine if two content strings are similar enough
+  ///
+  /// This is used in conflict resolution to determine if the server content
+  /// is similar enough to the reference content to consider them the same,
+  /// which would indicate that the server hasn't changed since our last sync.
+  ///
+  /// We use this for handling block deletions, where the local content is
+  /// shorter than the reference content.
+  bool _isContentSimilarEnough(String content1, String content2) {
+    // If they're exactly the same, they're similar enough
+    if (content1 == content2) {
+      return true;
+    }
+
+    // If one is empty and the other isn't, they're not similar
+    if (content1.isEmpty || content2.isEmpty) {
+      return false;
+    }
+
+    // If the length difference is too great, they're not similar
+    final lengthDiff = (content1.length - content2.length).abs();
+    if (lengthDiff > content1.length * 0.5) { // More than 50% different in length
+      return false;
+    }
+
+    // Check if the content is mostly the same by comparing blocks
+    final blocks1 = content1.split('\n\n');
+    final blocks2 = content2.split('\n\n');
+
+    // Count how many blocks are the same
+    int sameBlockCount = 0;
+    for (final block1 in blocks1) {
+      if (blocks2.contains(block1)) {
+        sameBlockCount++;
+      }
+    }
+
+    // If more than 70% of blocks are the same, consider them similar enough
+    final similarity = sameBlockCount / blocks1.length;
+    debugPrint('Content similarity: $similarity (${sameBlockCount}/${blocks1.length} blocks)');
+
+    return similarity >= 0.7; // 70% or more blocks are the same
   }
 }
