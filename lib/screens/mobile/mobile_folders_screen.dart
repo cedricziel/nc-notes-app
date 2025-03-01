@@ -26,34 +26,46 @@ class MobileFoldersScreen extends StatelessWidget {
         final isDarkMode = Theme.of(context).brightness == Brightness.dark;
         final backgroundColor = Theme.of(context).colorScheme.surface;
 
+        // Sync button with animated indicator
+        final syncAction = Consumer<NotesProvider>(
+          builder: (context, provider, child) {
+            // If syncing, show the animated indicator
+            if (provider.isLoading || provider.isSaving) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: SyncIndicator(),
+              );
+            }
+
+            // Otherwise show the regular sync button
+            return IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Sync with server',
+              onPressed: provider.isAuthenticated
+                  ? () => provider.syncWithServer()
+                  : null,
+            );
+          },
+        );
+
         return PlatformScaffold(
           backgroundColor: backgroundColor,
           appBar: PlatformAppBar(
-            title: const Text('Nextcloud Notes'),
-            backgroundColor: backgroundColor,
-            trailingActions: [
-              // Sync button with animated indicator
-              Consumer<NotesProvider>(
-                builder: (context, provider, child) {
-                  // If syncing, show the animated indicator
-                  if (provider.isLoading || provider.isSaving) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: SyncIndicator(),
-                    );
-                  }
-
-                  // Otherwise show the regular sync button
-                  return IconButton(
-                    icon: const Icon(Icons.refresh),
-                    tooltip: 'Sync with server',
-                    onPressed: provider.isAuthenticated
-                        ? () => provider.syncWithServer()
-                        : null,
-                  );
-                },
+            title: const Text(
+              'Nextcloud Notes',
+              style: TextStyle(
+                inherit: true,
+                fontFamily: 'SF Pro Text',
+                fontSize: 17.0,
+                fontWeight: FontWeight.w600,
               ),
-            ],
+            ),
+            backgroundColor: backgroundColor,
+            trailingActions: [syncAction],
+            cupertino: (_, __) => fpw.CupertinoNavigationBarData(
+              // Disable transitions to avoid TextStyle interpolation issues
+              transitionBetweenRoutes: false,
+            ),
           ),
           body: ListView(
             children: [

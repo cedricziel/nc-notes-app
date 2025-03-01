@@ -139,9 +139,21 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
         );
 
         final platformAppBar = PlatformAppBar(
-          title: Text(title),
+          title: Text(
+            title,
+            style: const TextStyle(
+              inherit: true,
+              fontFamily: 'SF Pro Text',
+              fontSize: 17.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           backgroundColor: backgroundColor,
           trailingActions: [syncIndicator],
+          cupertino: (_, __) => fpw.CupertinoNavigationBarData(
+            // Disable transitions to avoid TextStyle interpolation issues
+            transitionBetweenRoutes: false,
+          ),
         );
 
         return fpw.PlatformScaffold(
@@ -151,6 +163,10 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
           material: (_, __) => fpw.MaterialScaffoldData(
             floatingActionButton: fab,
           ),
+          cupertino: (_, __) => fpw.CupertinoPageScaffoldData(
+              // For Cupertino, we don't need to specify the navigationBar here
+              // as it's already handled by the PlatformAppBar
+              ),
         );
       },
     );

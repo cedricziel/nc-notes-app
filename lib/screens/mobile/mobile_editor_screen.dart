@@ -339,7 +339,15 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
       // Loading state
       return PlatformScaffold(
         appBar: PlatformAppBar(
-          title: Text('Loading...'),
+          title: const Text(
+            'Loading...',
+            style: TextStyle(
+              inherit: true,
+              fontFamily: 'SF Pro Text',
+              fontSize: 17.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         body: Center(
           child: PlatformService.useCupertino
@@ -517,9 +525,21 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
     return PlatformScaffold(
       backgroundColor: backgroundColor,
       appBar: PlatformAppBar(
-        title: Text(title),
+        title: Text(
+          title,
+          style: const TextStyle(
+            inherit: true,
+            fontFamily: 'SF Pro Text',
+            fontSize: 17.0,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: backgroundColor,
         trailingActions: appBarActions,
+        cupertino: (_, __) => fpw.CupertinoNavigationBarData(
+          // Disable transitions to avoid TextStyle interpolation issues
+          transitionBetweenRoutes: false,
+        ),
       ),
       body: editorContent,
       material: (_, __) => fpw.MaterialScaffoldData(
