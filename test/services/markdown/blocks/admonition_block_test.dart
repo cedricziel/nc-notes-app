@@ -112,7 +112,6 @@ void main() {
       const content = 'This is an admonition';
       const type = 'info';
       final block = AdmonitionBlock(content: content, type: type);
-      String? updatedContent;
 
       // Build the editor widget
       await tester.pumpWidget(
@@ -122,9 +121,7 @@ void main() {
               builder: (context) {
                 return block.buildEditor(
                   context,
-                  (value) {
-                    updatedContent = value;
-                  },
+                  (value) {},
                 );
               },
             ),

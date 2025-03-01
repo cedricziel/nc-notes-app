@@ -51,7 +51,6 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
       if (trimmedContent.startsWith('#')) {
         final match = RegExp(r'^(#{1,6})\s+(.+)$').firstMatch(trimmedContent);
         if (match != null) {
-          print('Converting block to heading: $trimmedContent');
           updatedBlock =
               MarkdownDocument.createBlockFromMarkdown(trimmedContent);
         } else {
@@ -61,13 +60,11 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
       }
       // If content starts with :::, convert to admonition
       else if (trimmedContent.startsWith(':::')) {
-        print('Converting block to admonition: $trimmedContent');
         updatedBlock = MarkdownDocument.createBlockFromMarkdown(trimmedContent);
       }
       // Otherwise, if it was an admonition or heading, convert to paragraph
       else if (currentBlock.runtimeType.toString().contains('Admonition') ||
           currentBlock.runtimeType.toString().contains('Heading')) {
-        print('Converting block to paragraph: $trimmedContent');
         updatedBlock = MarkdownDocument.createBlockFromMarkdown(trimmedContent);
       }
       // Otherwise, just update content
@@ -103,15 +100,11 @@ class _BlockBasedMarkdownEditorState extends State<BlockBasedMarkdownEditor> {
 
     setState(() {
       final newBlocks = List<MarkdownBlock>.from(_document.blocks);
-      final removedBlock = newBlocks[index];
-      print('Removing block at index $index: ${removedBlock.runtimeType}');
-      print('Block content before removal: "${removedBlock.content}"');
 
       newBlocks.removeAt(index);
 
       _document = MarkdownDocument(blocks: newBlocks);
       final newMarkdown = _document.toMarkdown();
-      print('Markdown after block removal: "$newMarkdown"');
       widget.onChanged(newMarkdown);
     });
   }

@@ -106,7 +106,7 @@ class HoverAwareAdmonitionBlock extends MarkdownAwareBlock {
         return HoverAwareAdmonitionBlock.fromMarkdown(content);
       } else {
         // Just update the content, preserving the type
-        return HoverAwareAdmonitionBlock(content: content, type: this.type);
+        return HoverAwareAdmonitionBlock(content: content, type: type);
       }
     }
 

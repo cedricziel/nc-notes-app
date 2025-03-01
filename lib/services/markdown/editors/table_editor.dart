@@ -251,35 +251,4 @@ class _TableEditorState extends State<TableEditor> {
       widget.onChanged(_cells, _hasHeader);
     });
   }
-
-  void _removeRow(int index) {
-    if (_cells.length <= 1) return; // Don't remove the last row
-
-    setState(() {
-      // Dispose controllers for the removed row
-      for (var controller in _controllers[index]) {
-        controller.dispose();
-      }
-
-      _cells.removeAt(index);
-      _controllers.removeAt(index);
-      widget.onChanged(_cells, _hasHeader);
-    });
-  }
-
-  void _removeColumn(int index) {
-    if (_cells.isEmpty || _cells[0].length <= 1)
-      return; // Don't remove the last column
-
-    setState(() {
-      for (var i = 0; i < _cells.length; i++) {
-        // Dispose controller for the removed cell
-        _controllers[i][index].dispose();
-
-        _cells[i].removeAt(index);
-        _controllers[i].removeAt(index);
-      }
-      widget.onChanged(_cells, _hasHeader);
-    });
-  }
 }

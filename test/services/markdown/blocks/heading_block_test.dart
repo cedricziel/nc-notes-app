@@ -113,7 +113,6 @@ void main() {
       const content = 'Test Heading';
       const level = 2;
       final block = HeadingBlock(content: content, level: level);
-      String? updatedContent;
 
       // Build the editor widget
       await tester.pumpWidget(
@@ -123,9 +122,7 @@ void main() {
               builder: (context) {
                 return block.buildEditor(
                   context,
-                  (value) {
-                    updatedContent = value;
-                  },
+                  (value) {},
                 );
               },
             ),

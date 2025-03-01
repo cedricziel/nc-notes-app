@@ -105,7 +105,7 @@ class AdmonitionBlock extends MarkdownBlock {
         return AdmonitionBlock.fromMarkdown(content);
       } else {
         // Just update the content, preserving the type
-        return AdmonitionBlock(content: content, type: this.type);
+        return AdmonitionBlock(content: content, type: type);
       }
     }
 

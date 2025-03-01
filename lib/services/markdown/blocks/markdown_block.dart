@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 /// Base abstract class for all markdown block types.
 abstract class MarkdownBlock {

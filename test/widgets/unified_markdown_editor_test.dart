@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_notes/widgets/unified_markdown_editor.dart';
-import 'package:flutter_notes/services/markdown/markdown_document.dart';
 
 void main() {
   group('UnifiedMarkdownEditor', () {
     testWidgets('renders initial markdown content',
         (WidgetTester tester) async {
       const initialMarkdown = '# Heading\n\nThis is a paragraph.';
-      String? updatedContent;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: UnifiedMarkdownEditor(
               initialMarkdown: initialMarkdown,
-              onChanged: (content) {
-                updatedContent = content;
-              },
+              onChanged: (content) {},
             ),
           ),
         ),

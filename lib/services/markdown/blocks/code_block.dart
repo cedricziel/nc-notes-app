@@ -85,7 +85,7 @@ class CodeBlock extends MarkdownBlock {
         return CodeBlock.fromMarkdown(content);
       } else {
         // Just update the content, preserving the language
-        return CodeBlock(content: content, language: this.language);
+        return CodeBlock(content: content, language: language);
       }
     }
 

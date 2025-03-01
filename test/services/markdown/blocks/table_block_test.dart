@@ -198,7 +198,6 @@ void main() {
         ['Cell 1', 'Cell 2']
       ];
       final block = TableBlock(content: content, cells: cells, hasHeader: true);
-      String? updatedContent;
 
       // Build the editor widget
       await tester.pumpWidget(
@@ -208,9 +207,7 @@ void main() {
               builder: (context) {
                 return block.buildEditor(
                   context,
-                  (value) {
-                    updatedContent = value;
-                  },
+                  (value) {},
                 );
               },
             ),

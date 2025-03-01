@@ -90,9 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
         debugPrint('Login failed or timed out');
         setState(() {
           _isLoading = false;
-          if (_errorMessage == null) {
-            _errorMessage = 'Login timed out. Please try again.';
-          }
+          _errorMessage ??= 'Login timed out. Please try again.';
           _statusMessage = null;
         });
       }

@@ -1,25 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_notes/widgets/block_based_markdown_editor.dart';
-import 'package:flutter_notes/services/markdown/blocks/cursor_aware_heading_block.dart';
-import 'package:flutter_notes/services/markdown/blocks/cursor_aware_paragraph_block.dart';
-import 'package:flutter_notes/services/markdown/blocks/cursor_aware_admonition_block.dart';
 
 void main() {
   group('BlockBasedMarkdownEditor', () {
     testWidgets('renders blocks from initial markdown',
         (WidgetTester tester) async {
       const initialMarkdown = '# Heading\n\nParagraph text';
-      String? updatedMarkdown;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: BlockBasedMarkdownEditor(
               initialMarkdown: initialMarkdown,
-              onChanged: (value) {
-                updatedMarkdown = value;
-              },
+              onChanged: (value) {},
             ),
           ),
         ),
@@ -46,7 +40,6 @@ void main() {
     testWidgets('transforms paragraph to heading when # is added',
         (WidgetTester tester) async {
       const initialMarkdown = 'Paragraph text';
-      String? updatedMarkdown;
 
       // Create a controller to capture the updated markdown
       final controller = ValueNotifier<String>(initialMarkdown);
@@ -57,7 +50,6 @@ void main() {
             body: BlockBasedMarkdownEditor(
               initialMarkdown: initialMarkdown,
               onChanged: (value) {
-                updatedMarkdown = value;
                 controller.value = value;
               },
             ),
@@ -91,7 +83,6 @@ void main() {
     testWidgets('transforms paragraph to admonition when ::: is added',
         (WidgetTester tester) async {
       const initialMarkdown = 'Paragraph text';
-      String? updatedMarkdown;
 
       // Create a controller to capture the updated markdown
       final controller = ValueNotifier<String>(initialMarkdown);
@@ -102,7 +93,6 @@ void main() {
             body: BlockBasedMarkdownEditor(
               initialMarkdown: initialMarkdown,
               onChanged: (value) {
-                updatedMarkdown = value;
                 controller.value = value;
               },
             ),
@@ -137,7 +127,6 @@ void main() {
     testWidgets('transforms heading to paragraph when # is removed',
         (WidgetTester tester) async {
       const initialMarkdown = '# Heading text';
-      String? updatedMarkdown;
 
       // Create a controller to capture the updated markdown
       final controller = ValueNotifier<String>(initialMarkdown);
@@ -148,7 +137,6 @@ void main() {
             body: BlockBasedMarkdownEditor(
               initialMarkdown: initialMarkdown,
               onChanged: (value) {
-                updatedMarkdown = value;
                 controller.value = value;
               },
             ),
@@ -171,7 +159,6 @@ void main() {
     testWidgets('transforms admonition to paragraph when ::: is removed',
         (WidgetTester tester) async {
       const initialMarkdown = ':::info\nAdmonition text\n:::';
-      String? updatedMarkdown;
 
       // Create a controller to capture the updated markdown
       final controller = ValueNotifier<String>(initialMarkdown);
@@ -182,7 +169,6 @@ void main() {
             body: BlockBasedMarkdownEditor(
               initialMarkdown: initialMarkdown,
               onChanged: (value) {
-                updatedMarkdown = value;
                 controller.value = value;
               },
             ),

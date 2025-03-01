@@ -72,16 +72,16 @@ class Note {
   /// Creates a reference copy of this note for conflict detection
   Note createReference() {
     return Note(
-      id: this.id,
-      title: this.title,
-      content: this.content,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      folder: this.folder,
-      etag: this.etag,
-      readonly: this.readonly,
-      favorite: this.favorite,
-      tags: this.tags,
+      id: id,
+      title: title,
+      content: content,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      folder: folder,
+      etag: etag,
+      readonly: readonly,
+      favorite: favorite,
+      tags: tags,
     );
   }
 

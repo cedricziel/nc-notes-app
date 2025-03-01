@@ -1,4 +1,5 @@
 /// Utility functions for working with tags in notes
+library;
 
 /// Extracts hashtags from the given content
 ///

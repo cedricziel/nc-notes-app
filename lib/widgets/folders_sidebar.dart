@@ -13,8 +13,7 @@ class FoldersSidebar extends StatelessWidget {
     return Consumer<NotesProvider>(
       builder: (context, notesProvider, child) {
         final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-        final backgroundColor = Theme.of(context).colorScheme.background;
-        final textColor = isDarkMode ? Colors.white : Colors.black;
+        final backgroundColor = Theme.of(context).colorScheme.surface;
 
         return Scaffold(
           backgroundColor: backgroundColor,

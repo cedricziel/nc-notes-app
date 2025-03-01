@@ -88,8 +88,7 @@ class TableBlock extends MarkdownBlock {
         return TableBlock.fromMarkdown(content);
       } else {
         // Just update the content, preserving the cells and hasHeader
-        return TableBlock(
-            content: content, cells: this.cells, hasHeader: this.hasHeader);
+        return TableBlock(content: content, cells: cells, hasHeader: hasHeader);
       }
     }
 

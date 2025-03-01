@@ -90,8 +90,6 @@ class NextcloudNotesApi {
     int? chunkSize,
     String? chunkCursor,
   }) async {
-    print('Fetching all notes from server');
-
     // Build query parameters
     final queryParams = <String, String>{};
     if (category != null) {
@@ -129,15 +127,11 @@ class NextcloudNotesApi {
         jsonList.map((json) => _convertApiNoteToAppNote(json)).toList();
 
     // Log ETags for debugging
-    print('Fetched ${notes.length} notes from server');
     int notesWithEtag = notes
         .where((note) => note.etag != null && note.etag!.isNotEmpty)
         .length;
-    print('$notesWithEtag/${notes.length} notes have valid ETags');
 
-    if (notesWithEtag < notes.length) {
-      print('Warning: Some notes are missing ETags from the server');
-    }
+    if (notesWithEtag < notes.length) {}
 
     return notes;
   }
@@ -146,8 +140,6 @@ class NextcloudNotesApi {
   ///
   /// Returns the note with its current ETag from the server.
   Future<Note> getNote(int id) async {
-    print('Fetching note with ID: $id');
-
     final response = await _client.get(
       Uri.parse('${config.apiUrl}/notes/$id'),
       headers: {
@@ -159,10 +151,7 @@ class NextcloudNotesApi {
     // Check for ETag in response headers
     final responseEtag = response.headers['etag'];
     if (responseEtag != null) {
-      print('Received ETag in response headers: $responseEtag');
-    } else {
-      print('No ETag found in response headers');
-    }
+    } else {}
 
     _handleError(response);
 
@@ -171,12 +160,10 @@ class NextcloudNotesApi {
     // If the response body doesn't include an ETag but we got one in the headers,
     // add it to the JSON map before converting to a Note
     if (jsonMap['etag'] == null && responseEtag != null) {
-      print('Adding ETag from headers to response body');
       jsonMap['etag'] = responseEtag;
     }
 
     final note = _convertApiNoteToAppNote(jsonMap);
-    print('Note fetched successfully, ETag: ${note.etag}');
 
     return note;
   }
@@ -190,8 +177,6 @@ class NextcloudNotesApi {
     String? category,
     bool? favorite,
   }) async {
-    print('Creating new note: "$title"');
-
     final Map<String, dynamic> noteData = {
       'title': title,
       'content': content,
@@ -205,7 +190,6 @@ class NextcloudNotesApi {
       noteData['favorite'] = favorite;
     }
 
-    print('Sending POST request to ${config.apiUrl}/notes');
     final response = await _client.post(
       Uri.parse('${config.apiUrl}/notes'),
       headers: {
@@ -219,10 +203,7 @@ class NextcloudNotesApi {
     // Check for ETag in response headers
     final responseEtag = response.headers['etag'];
     if (responseEtag != null) {
-      print('Received ETag in response headers: $responseEtag');
-    } else {
-      print('No ETag found in response headers');
-    }
+    } else {}
 
     _handleError(response);
 
@@ -231,13 +212,10 @@ class NextcloudNotesApi {
     // If the response body doesn't include an ETag but we got one in the headers,
     // add it to the JSON map before converting to a Note
     if (jsonMap['etag'] == null && responseEtag != null) {
-      print('Adding ETag from headers to response body');
       jsonMap['etag'] = responseEtag;
     }
 
     final createdNote = _convertApiNoteToAppNote(jsonMap);
-    print(
-        'Note created successfully, ID: ${createdNote.id}, ETag: ${createdNote.etag}');
 
     return createdNote;
   }
@@ -286,13 +264,9 @@ class NextcloudNotesApi {
       // Ensure the ETag is properly quoted (add quotes if not already present)
       final quotedEtag =
           etag.startsWith('"') && etag.endsWith('"') ? etag : '"$etag"';
-      print('Adding If-Match header with ETag: $quotedEtag');
       headers['If-Match'] = quotedEtag;
-    } else {
-      print('Warning: No ETag provided for note update (ID: $id)');
-    }
+    } else {}
 
-    print('Sending PUT request to ${config.apiUrl}/notes/$id');
     final response = await _client.put(
       Uri.parse('${config.apiUrl}/notes/$id'),
       headers: headers,
@@ -302,10 +276,7 @@ class NextcloudNotesApi {
     // Check for ETag in response headers
     final responseEtag = response.headers['etag'];
     if (responseEtag != null) {
-      print('Received ETag in response headers: $responseEtag');
-    } else {
-      print('No ETag found in response headers');
-    }
+    } else {}
 
     _handleError(response);
 
@@ -314,12 +285,10 @@ class NextcloudNotesApi {
     // If the response body doesn't include an ETag but we got one in the headers,
     // add it to the JSON map before converting to a Note
     if (jsonMap['etag'] == null && responseEtag != null) {
-      print('Adding ETag from headers to response body');
       jsonMap['etag'] = responseEtag;
     }
 
     final updatedNote = _convertApiNoteToAppNote(jsonMap);
-    print('Note updated successfully, new ETag: ${updatedNote.etag}');
 
     return updatedNote;
   }
@@ -388,9 +357,7 @@ class NextcloudNotesApi {
 
     // Ensure we have a valid etag
     String? etag = apiNote['etag'];
-    if (etag == null || etag.isEmpty) {
-      print('Warning: Note ${apiNote['id']} has no ETag from server');
-    }
+    if (etag == null || etag.isEmpty) {}
 
     return Note(
       id: apiNote['id'].toString(), // Convert to string to match our model
@@ -403,20 +370,5 @@ class NextcloudNotesApi {
       readonly: apiNote['readonly'] ?? false,
       favorite: apiNote['favorite'] ?? false,
     );
-  }
-
-  /// Converts a note from the app's Note model to the API format
-  Map<String, dynamic> _convertAppNoteToApiNote(Note note) {
-    final Map<String, dynamic> apiNote = {
-      'title': note.title,
-      'content': note.content,
-      'favorite': note.favorite,
-    };
-
-    if (note.folder != null && note.folder!.isNotEmpty) {
-      apiNote['category'] = note.folder;
-    }
-
-    return apiNote;
   }
 }

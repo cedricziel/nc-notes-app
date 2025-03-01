@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import '../services/markdown/markdown_document.dart';
 import '../services/markdown/blocks/markdown_block.dart';
 
@@ -31,6 +29,7 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
   late TextEditingController _controller;
   late MarkdownDocument _document;
   late FocusNode _focusNode;
+  late ScrollController _scrollController;
 
   // Track which block contains the cursor
   int _cursorBlockIndex = -1;
@@ -50,6 +49,7 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
     _document = MarkdownDocument.fromMarkdown(widget.initialMarkdown);
     _controller = TextEditingController(text: widget.initialMarkdown);
     _focusNode = FocusNode();
+    _scrollController = ScrollController();
 
     // Initialize block ranges
     _updateBlockRanges();
@@ -82,6 +82,7 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _focusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -202,6 +203,15 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
   Widget _buildEditMode() {
     return Stack(
       children: [
+        // Rendered blocks (visible layer)
+        Positioned.fill(
+          child: IgnorePointer(
+            // Allow input events to pass through to the TextField
+            ignoring: true,
+            child: _buildRenderedBlocks(),
+          ),
+        ),
+
         // The actual editable text field (invisible layer for editing)
         Positioned.fill(
           child: TextField(
@@ -219,12 +229,24 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
             // Ensure cursor is visible even though text is transparent
             cursorColor:
                 Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+            onTap: () {
+              // Update cursor position when tapped
+              _updateCursorBlockIndex();
+            },
           ),
         ),
 
-        // Rendered blocks (visible layer)
+        // Gesture detector to handle taps on blocks
         Positioned.fill(
-          child: _buildRenderedBlocks(),
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTapDown: (details) {
+              _handleTapOnRenderedBlocks(details);
+            },
+            child: Container(
+              color: Colors.transparent,
+            ),
+          ),
         ),
       ],
     );
@@ -232,6 +254,7 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
 
   Widget _buildRenderedBlocks() {
     return ListView.builder(
+      controller: _scrollController,
       itemCount: _document.blocks.length,
       itemBuilder: (context, index) {
         final block = _document.blocks[index];
@@ -243,6 +266,70 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
         );
       },
     );
+  }
+
+  // Handle tap on rendered blocks to position cursor
+  void _handleTapOnRenderedBlocks(TapDownDetails details) {
+    // Request focus for the text field
+    _focusNode.requestFocus();
+
+    // Calculate which block was tapped
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    final localPosition = box.globalToLocal(details.globalPosition);
+
+    // Find the block at the tap position
+    final scrollOffset = _scrollController.offset;
+
+    // Get all rendered block positions
+    final blockPositions = <int, double>{};
+    double currentPosition = 0;
+
+    for (int i = 0; i < _document.blocks.length; i++) {
+      // This is an approximation - in a real app, you'd measure actual rendered heights
+      final blockHeight = 50.0 + (_document.blocks[i].content.length / 20);
+      blockPositions[i] = currentPosition;
+      currentPosition += blockHeight;
+    }
+
+    // Find which block was tapped
+    int tappedBlockIndex = -1;
+    for (int i = 0; i < _document.blocks.length; i++) {
+      final blockTop = blockPositions[i] ?? 0;
+      final blockBottom = i < _document.blocks.length - 1
+          ? blockPositions[i + 1] ?? double.infinity
+          : double.infinity;
+
+      if (localPosition.dy + scrollOffset >= blockTop &&
+          localPosition.dy + scrollOffset < blockBottom) {
+        tappedBlockIndex = i;
+        break;
+      }
+    }
+
+    if (tappedBlockIndex >= 0) {
+      // Calculate approximate cursor position in the document
+      int cursorPosition = 0;
+      for (int i = 0; i < tappedBlockIndex; i++) {
+        cursorPosition +=
+            _document.blocks[i].content.length + 2; // +2 for newlines
+      }
+
+      // Add an offset within the block based on tap position
+      final blockWidth = box.size.width;
+      final relativeX = localPosition.dx / blockWidth;
+      final blockLength = _document.blocks[tappedBlockIndex].content.length;
+      final positionInBlock = (relativeX * blockLength).round();
+
+      cursorPosition += positionInBlock.clamp(0, blockLength);
+
+      // Set cursor position
+      _controller.selection = TextSelection.collapsed(offset: cursorPosition);
+
+      // Update active block
+      setState(() {
+        _cursorBlockIndex = tappedBlockIndex;
+      });
+    }
   }
 
   Widget _buildBlockWithActiveState(
@@ -281,6 +368,7 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
 
   Widget _buildPreviewMode() {
     return ListView.builder(
+      controller: _scrollController,
       itemCount: _document.blocks.length,
       itemBuilder: (context, index) {
         final block = _document.blocks[index];

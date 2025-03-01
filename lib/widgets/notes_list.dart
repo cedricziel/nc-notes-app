@@ -14,9 +14,7 @@ class NotesList extends StatelessWidget {
       builder: (context, notesProvider, child) {
         final notes = notesProvider.filteredNotes;
         final selectedNote = notesProvider.selectedNote;
-        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
         final backgroundColor = Theme.of(context).colorScheme.background;
-        final textColor = isDarkMode ? Colors.white : Colors.black;
 
         // Group notes by time periods
         final now = DateTime.now();

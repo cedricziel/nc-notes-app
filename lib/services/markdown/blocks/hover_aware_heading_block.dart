@@ -44,7 +44,7 @@ class HoverAwareHeadingBlock extends MarkdownAwareBlock {
   }
 
   @override
-  String toMarkdown() => '#' * level + ' ' + content;
+  String toMarkdown() => '${'#' * level} $content';
 
   @override
   HoverAwareHeadingBlock copyWith({String? content}) {
@@ -154,7 +154,7 @@ class _HoverAwareHeadingEditorState extends State<HoverAwareHeadingEditor> {
             ),
             style: _getHeadingStyle(context, _level),
             onChanged: (newContent) {
-              widget.onChanged('#' * _level + ' ' + newContent);
+              widget.onChanged('${'#' * _level} $newContent');
             },
           ),
         ),
@@ -173,7 +173,7 @@ class _HoverAwareHeadingEditorState extends State<HoverAwareHeadingEditor> {
               setState(() {
                 _level = newLevel;
               });
-              widget.onChanged('#' * newLevel + ' ' + _controller.text);
+              widget.onChanged('${'#' * newLevel} ${_controller.text}');
             }
           },
         ),

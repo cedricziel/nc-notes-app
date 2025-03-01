@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
@@ -62,26 +61,18 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     _hasUnsavedChanges = true;
 
     // Debug logging for content changes
-    print(
-        'Content changed, scheduling save: ${_contentController.text.length} characters');
 
     // Cancel any pending save operation
     _saveTimer?.cancel();
 
     // Start a new timer
     _saveTimer = Timer(const Duration(seconds: 5), () {
-      print('Debounce timer expired, saving note');
       _saveNoteImmediately();
     });
   }
 
   // Save immediately without debounce
   void _saveNoteImmediately() {
-    print(
-        'Saving note immediately, content length: ${_contentController.text.length}');
-    print(
-        'Content preview: "${_contentController.text.substring(0, _contentController.text.length > 100 ? 100 : _contentController.text.length)}..."');
-
     final notesProvider = Provider.of<NotesProvider>(context, listen: false);
     notesProvider.updateNote(
       widget.note.id,
@@ -89,91 +80,12 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
       content: _contentController.text,
     );
     _hasUnsavedChanges = false;
-    print('Note saved to provider');
-  }
-
-  // Insert markdown formatting at cursor position
-  void _insertMarkdown(String markdownSyntax, {String? placeholder}) {
-    final text = _contentController.text;
-    final selection = _contentFocusNode.hasFocus
-        ? TextSelection(
-            baseOffset: _contentController.selection.baseOffset,
-            extentOffset: _contentController.selection.extentOffset,
-          )
-        : const TextSelection.collapsed(offset: 0);
-
-    // Get selected text or use placeholder
-    final selectedText = selection.textInside(text);
-    final textToInsert = selectedText.isEmpty && placeholder != null
-        ? placeholder
-        : selectedText;
-
-    // Format based on markdown syntax type
-    String newText;
-    int newCursorPosition;
-
-    if (markdownSyntax == '**') {
-      // Bold
-      newText = text.replaceRange(
-          selection.start, selection.end, '**$textToInsert**');
-      newCursorPosition = selection.start + 2 + textToInsert.length + 2;
-    } else if (markdownSyntax == '*') {
-      // Italic
-      newText =
-          text.replaceRange(selection.start, selection.end, '*$textToInsert*');
-      newCursorPosition = selection.start + 1 + textToInsert.length + 1;
-    } else if (markdownSyntax == '- ') {
-      // Unordered list
-      newText =
-          text.replaceRange(selection.start, selection.end, '- $textToInsert');
-      newCursorPosition = selection.start + 2 + textToInsert.length;
-    } else if (markdownSyntax == '1. ') {
-      // Ordered list
-      newText =
-          text.replaceRange(selection.start, selection.end, '1. $textToInsert');
-      newCursorPosition = selection.start + 3 + textToInsert.length;
-    } else if (markdownSyntax == '# ') {
-      // Heading 1
-      newText =
-          text.replaceRange(selection.start, selection.end, '# $textToInsert');
-      newCursorPosition = selection.start + 2 + textToInsert.length;
-    } else if (markdownSyntax == '## ') {
-      // Heading 2
-      newText =
-          text.replaceRange(selection.start, selection.end, '## $textToInsert');
-      newCursorPosition = selection.start + 3 + textToInsert.length;
-    } else if (markdownSyntax == '[](url)') {
-      // Link
-      newText = text.replaceRange(
-          selection.start, selection.end, '[$textToInsert](url)');
-      newCursorPosition = selection.start + 1 + textToInsert.length + 1;
-    } else if (markdownSyntax == '`') {
-      // Code
-      newText =
-          text.replaceRange(selection.start, selection.end, '`$textToInsert`');
-      newCursorPosition = selection.start + 1 + textToInsert.length + 1;
-    } else {
-      // Default: just insert the markdown syntax
-      newText = text.replaceRange(
-          selection.start, selection.end, '$markdownSyntax$textToInsert');
-      newCursorPosition =
-          selection.start + markdownSyntax.length + textToInsert.length;
-    }
-
-    // Update text controller
-    _contentController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: newCursorPosition),
-    );
-
-    // Trigger save
-    _saveNote();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = Theme.of(context).colorScheme.background;
+    final backgroundColor = Theme.of(context).colorScheme.surface;
     final textColor = isDarkMode ? Colors.white : Colors.black;
 
     // Format date for display

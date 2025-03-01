@@ -123,7 +123,6 @@ void main() {
       const content = 'const x = 5;';
       const language = 'javascript';
       final block = CodeBlock(content: content, language: language);
-      String? updatedContent;
 
       // Build the editor widget
       await tester.pumpWidget(
@@ -133,9 +132,7 @@ void main() {
               builder: (context) {
                 return block.buildEditor(
                   context,
-                  (value) {
-                    updatedContent = value;
-                  },
+                  (value) {},
                 );
               },
             ),

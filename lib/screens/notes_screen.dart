@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
 import '../providers/notes_provider.dart';
 import '../widgets/folders_sidebar.dart';
 import '../widgets/notes_list.dart';
 import '../widgets/markdown_editor.dart';
-import 'login_screen.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
@@ -26,9 +24,8 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     final notesProvider = Provider.of<NotesProvider>(context);
-    final bool isMacOS = Platform.isMacOS;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = Theme.of(context).colorScheme.background;
+    final backgroundColor = Theme.of(context).colorScheme.surface;
 
     return Scaffold(
       backgroundColor: backgroundColor,

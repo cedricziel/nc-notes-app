@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/note.dart';
 import '../models/folder.dart';
@@ -19,7 +18,6 @@ class NotesProvider with ChangeNotifier {
   NextcloudNotesApi? _api;
   bool _isLoading = false;
   bool _isSaving = false;
-  bool _manualSave = false;
   String? _errorMessage;
 
   // Queue for note update operations
@@ -242,7 +240,6 @@ class NotesProvider with ChangeNotifier {
       }
     } finally {
       _isSaving = false;
-      _manualSave = false;
       notifyListeners();
 
       // Process any new queue items that were added during processing
@@ -408,7 +405,6 @@ class NotesProvider with ChangeNotifier {
     _notes[index] = updatedNote;
 
     // Set manual save flag
-    _manualSave = true;
 
     // Queue the save command
     queueCommand(noteId, 'content');
@@ -591,7 +587,7 @@ class NotesProvider with ChangeNotifier {
         // Log first few blocks
         for (int i = 0; i < blocks.length && i < 3; i++) {
           final blockPreview = blocks[i].length > 30
-              ? blocks[i].substring(0, 30) + '...'
+              ? '${blocks[i].substring(0, 30)}...'
               : blocks[i];
           debugPrint('Block $i: "$blockPreview"');
         }
@@ -1082,7 +1078,7 @@ class NotesProvider with ChangeNotifier {
     // If more than 70% of blocks are the same, consider them similar enough
     final similarity = sameBlockCount / blocks1.length;
     debugPrint(
-        'Content similarity: $similarity (${sameBlockCount}/${blocks1.length} blocks)');
+        'Content similarity: $similarity ($sameBlockCount/${blocks1.length} blocks)');
 
     return similarity >= 0.7; // 70% or more blocks are the same
   }
