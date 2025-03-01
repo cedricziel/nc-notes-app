@@ -60,18 +60,27 @@ class FoldersSidebar extends StatelessWidget {
 
                     // Tags Section
                     _buildSectionHeader(context, 'Tags'),
-                    _buildTagItem(
-                      context,
-                      'Alle Tags',
-                      isSelected: notesProvider.selectedTag == null,
-                      onTap: () => notesProvider.selectTag(null),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Wrap(
+                        spacing: 8.0, // horizontal space between chips
+                        runSpacing: 8.0, // vertical space between lines
+                        children: [
+                          _buildTagItem(
+                            context,
+                            'Alle Tags',
+                            isSelected: notesProvider.selectedTag == null,
+                            onTap: () => notesProvider.selectTag(null),
+                          ),
+                          ...notesProvider.allTags.map((tag) => _buildTagItem(
+                                context,
+                                tag,
+                                isSelected: notesProvider.selectedTag == tag,
+                                onTap: () => notesProvider.selectTag(tag),
+                              )),
+                        ],
+                      ),
                     ),
-                    ...notesProvider.allTags.map((tag) => _buildTagItem(
-                          context,
-                          tag,
-                          isSelected: notesProvider.selectedTag == tag,
-                          onTap: () => notesProvider.selectTag(tag),
-                        )),
 
                     // Add extra padding at the bottom to ensure content is visible above the sticky controls
                     const SizedBox(height: 20),
@@ -273,27 +282,24 @@ class FoldersSidebar extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        child: Chip(
-          label: Text(
-            tag,
-            style: TextStyle(
-              fontSize: 12,
-              color: isSelected ? selectedColor : textColor,
-            ),
+      child: Chip(
+        label: Text(
+          tag,
+          style: TextStyle(
+            fontSize: 12,
+            color: isSelected ? selectedColor : textColor,
           ),
-          backgroundColor: isDarkMode
-              ? (isSelected
-                  ? const Color(0xFF3D3D3D).withOpacity(0.7)
-                  : const Color(0xFF3D3D3D))
-              : (isSelected
-                  ? const Color(0xFFE5E5E5).withOpacity(0.7)
-                  : const Color(0xFFE5E5E5)),
-          visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-          padding: EdgeInsets.zero,
-          labelPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: -2),
         ),
+        backgroundColor: isDarkMode
+            ? (isSelected
+                ? const Color(0xFF3D3D3D).withOpacity(0.7)
+                : const Color(0xFF3D3D3D))
+            : (isSelected
+                ? const Color(0xFFE5E5E5).withOpacity(0.7)
+                : const Color(0xFFE5E5E5)),
+        visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+        padding: EdgeInsets.zero,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: -2),
       ),
     );
   }
