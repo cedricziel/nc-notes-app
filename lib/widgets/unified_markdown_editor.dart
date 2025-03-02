@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../services/markdown/markdown_document.dart';
 import '../services/markdown/blocks/markdown_block.dart';
 import 'platform/platform_text_field.dart';
+import 'platform/platform_service.dart';
+
+/// Enum to represent the different editor modes
+enum EditorMode {
+  /// View mode - shows rendered markdown without editing capability
+  view,
+
+  /// Edit unified mode - shows editable text with rendered blocks
+  editUnified,
+
+  /// Edit raw mode - shows raw markdown text without rendering
+  editRaw,
+}
 
 /// A unified markdown editor that allows seamless cursor navigation
 /// while maintaining the block-based document model.
@@ -41,8 +55,8 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
   // Map of block indices to their text ranges in the document
   late List<_BlockRange> _blockRanges;
 
-  // Whether we're in preview mode
-  bool _isPreviewMode = false;
+  // Current editor mode
+  EditorMode _editorMode = EditorMode.editUnified;
 
   @override
   void initState() {
@@ -177,31 +191,107 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Preview mode toggle
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton.icon(
-              icon: Icon(_isPreviewMode ? Icons.edit : Icons.visibility),
-              label: Text(_isPreviewMode ? 'Edit' : 'Preview'),
-              onPressed: () {
-                setState(() {
-                  _isPreviewMode = !_isPreviewMode;
-                });
-              },
-            ),
-          ],
+        // Editor mode toggle
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ToggleButtons(
+                isSelected: [
+                  _editorMode == EditorMode.view,
+                  _editorMode == EditorMode.editUnified,
+                  _editorMode == EditorMode.editRaw,
+                ],
+                onPressed: (index) {
+                  setState(() {
+                    switch (index) {
+                      case 0:
+                        _editorMode = EditorMode.view;
+                        break;
+                      case 1:
+                        _editorMode = EditorMode.editUnified;
+                        break;
+                      case 2:
+                        _editorMode = EditorMode.editRaw;
+                        break;
+                    }
+                  });
+                },
+                borderRadius: BorderRadius.circular(8),
+                children: const [
+                  Tooltip(
+                    message: 'View',
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Icon(Icons.visibility),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Edit Unified',
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Icon(Icons.edit),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Edit Raw',
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      child: Icon(Icons.code),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
 
-        // Editor or preview
+        // Editor content based on mode
         Expanded(
-          child: _isPreviewMode ? _buildPreviewMode() : _buildEditMode(),
+          child: _buildEditorContent(),
         ),
       ],
     );
   }
 
-  Widget _buildEditMode() {
+  /// Builds the appropriate editor content based on the current mode
+  Widget _buildEditorContent() {
+    switch (_editorMode) {
+      case EditorMode.view:
+        return _buildViewMode();
+      case EditorMode.editUnified:
+        return _buildEditUnifiedMode();
+      case EditorMode.editRaw:
+        return _buildRawEditMode();
+    }
+  }
+
+  /// Builds the view mode (previously called preview mode)
+  Widget _buildViewMode() {
+    // Check if we're running on iOS to use appropriate scrolling physics
+    final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
+    return ListView.builder(
+      controller: _scrollController,
+      // Use iOS-style bouncing physics on iOS
+      physics: isIOS
+          ? const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+          : const ClampingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
+      itemCount: _document.blocks.length,
+      itemBuilder: (context, index) {
+        final block = _document.blocks[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: block.buildPreview(context),
+        );
+      },
+    );
+  }
+
+  /// Builds the unified edit mode (previously called edit mode)
+  Widget _buildEditUnifiedMode() {
     return Stack(
       children: [
         // Rendered blocks (visible layer)
@@ -254,6 +344,66 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
         ),
       ],
     );
+  }
+
+  /// Builds the raw text edit mode
+  Widget _buildRawEditMode() {
+    // Check if we're running on iOS
+    final bool isIOS = PlatformService.useCupertino;
+
+    if (isIOS) {
+      // iOS implementation - use a custom solution since CupertinoTextField
+      // doesn't support multiline expansion well
+      return Container(
+        height: double.infinity, // Take all available height
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          border: Border.all(
+            color: CupertinoColors.systemGrey4.resolveFrom(context),
+            width: 0.5,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        // Use Material TextField with Cupertino styling for better multiline support
+        child: TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          expands: true,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            hintText: 'Enter markdown text...',
+          ),
+          style: Theme.of(context).textTheme.bodyMedium,
+          onChanged: (_) {
+            // This is handled by the controller listener
+          },
+        ),
+      );
+    } else {
+      // Android implementation - use TextField directly with full expansion
+      return Container(
+        height: double.infinity, // Take all available height
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          expands: true,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            hintText: 'Enter markdown text...',
+          ),
+          style: Theme.of(context).textTheme.bodyMedium,
+          onChanged: (_) {
+            // This is handled by the controller listener
+          },
+        ),
+      );
+    }
   }
 
   Widget _buildRenderedBlocks() {
@@ -376,28 +526,6 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
 
   Widget _buildFormattedView(MarkdownBlock block) {
     return block.buildPreview(context);
-  }
-
-  Widget _buildPreviewMode() {
-    // Check if we're running on iOS to use appropriate scrolling physics
-    final bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
-
-    return ListView.builder(
-      controller: _scrollController,
-      // Use iOS-style bouncing physics on iOS
-      physics: isIOS
-          ? const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
-          : const ClampingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics()),
-      itemCount: _document.blocks.length,
-      itemBuilder: (context, index) {
-        final block = _document.blocks[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: block.buildPreview(context),
-        );
-      },
-    );
   }
 }
 
