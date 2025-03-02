@@ -244,6 +244,11 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
           ),
           home: homeWidget,
+          localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+            DefaultCupertinoLocalizations.delegate,
+          ],
         ),
       ),
     );
