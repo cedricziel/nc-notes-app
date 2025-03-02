@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
 import '../utils/keyboard_shortcuts.dart';
-import 'unified_markdown_editor.dart';
+import 'unified_markdown_editor.dart' show UnifiedMarkdownEditor, EditorMode;
 import 'sync_indicator.dart';
 
 class MarkdownEditor extends StatefulWidget {
@@ -24,6 +24,9 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   late FocusNode _contentFocusNode;
   Timer? _saveTimer;
   bool _hasUnsavedChanges = false;
+
+  // Current editor mode
+  EditorMode _editorMode = EditorMode.editRaw;
 
   @override
   void initState() {
@@ -118,128 +121,183 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
             // Main content
             Expanded(
               child: Scaffold(
-            backgroundColor: backgroundColor,
-            appBar: AppBar(
-              backgroundColor: backgroundColor,
-              leading: SizedBox(
-                width: 60,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                backgroundColor: backgroundColor,
+                appBar: AppBar(
+                  backgroundColor: backgroundColor,
+                  leading: SizedBox(
+                    width: 60,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          tooltip: 'New Note',
+                          onPressed: () =>
+                              Provider.of<NotesProvider>(context, listen: false)
+                                  .addNote(),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        // Sync indicator next to the pencil icon
+                        const SyncIndicator(),
+                      ],
+                    ),
+                  ),
+                  leadingWidth: 60, // Adjust width to fit both icons
+                  toolbarHeight: 36,
+                  actions: [
+                    // Toolbar icons
                     IconButton(
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      tooltip: 'New Note',
-                      onPressed: () =>
-                          Provider.of<NotesProvider>(context, listen: false)
-                              .addNote(),
+                      icon: const Icon(Icons.text_format, size: 18),
+                      tooltip: 'Text Formatting',
+                      onPressed: () {},
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       visualDensity: VisualDensity.compact,
                     ),
-                    // Sync indicator next to the pencil icon
-                    const SyncIndicator(),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.format_list_bulleted, size: 18),
+                      tooltip: 'Lists',
+                      onPressed: () {},
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.table_chart_outlined, size: 18),
+                      tooltip: 'Tables',
+                      onPressed: () {},
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.image_outlined, size: 18),
+                      tooltip: 'Images',
+                      onPressed: () {},
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(24),
+                    child: Container(
+                      width: double.infinity,
+                      padding:
+                          const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        formattedDate,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: textColor.withOpacity(0.6),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                body: Column(
+                  children: [
+                    // Title field and editor mode toggle in the same row
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Row(
+                        children: [
+                          // Title field
+                          Expanded(
+                            child: TextField(
+                              controller: _titleController,
+                              decoration: InputDecoration(
+                                hintText: 'Title',
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                                hintStyle: TextStyle(
+                                    color: textColor.withOpacity(0.6)),
+                              ),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                              onChanged: (_) => _saveNote(),
+                              onSubmitted: (_) {
+                                _contentFocusNode.requestFocus();
+                              },
+                            ),
+                          ),
+
+                          // Editor mode toggle
+                          ToggleButtons(
+                            isSelected: [
+                              _editorMode == EditorMode.editRaw,
+                              _editorMode == EditorMode.view,
+                              _editorMode == EditorMode.editUnified,
+                            ],
+                            onPressed: (index) {
+                              setState(() {
+                                switch (index) {
+                                  case 0:
+                                    _editorMode = EditorMode.editRaw;
+                                    break;
+                                  case 1:
+                                    _editorMode = EditorMode.view;
+                                    break;
+                                  case 2:
+                                    _editorMode = EditorMode.editUnified;
+                                    break;
+                                }
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            constraints: const BoxConstraints(
+                                minHeight: 36, minWidth: 36),
+                            children: const [
+                              Tooltip(
+                                message: 'Edit Raw',
+                                child: Icon(Icons.code, size: 18),
+                              ),
+                              Tooltip(
+                                message: 'View',
+                                child: Icon(Icons.visibility, size: 18),
+                              ),
+                              Tooltip(
+                                message: 'Edit Unified',
+                                child: Icon(Icons.edit, size: 18),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Content area - block-based markdown editor
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: UnifiedMarkdownEditor(
+                          initialMarkdown: _contentController.text,
+                          onChanged: (newContent) {
+                            _contentController.text = newContent;
+                            _saveNote();
+                          },
+                          showBlockControls: true,
+                          editorMode: _editorMode,
+                          onEditorModeChanged: (mode) {
+                            setState(() {
+                              _editorMode = mode;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              leadingWidth: 60, // Adjust width to fit both icons
-              toolbarHeight: 36,
-              actions: [
-                // Toolbar icons
-                IconButton(
-                  icon: const Icon(Icons.text_format, size: 18),
-                  tooltip: 'Text Formatting',
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  visualDensity: VisualDensity.compact,
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.format_list_bulleted, size: 18),
-                  tooltip: 'Lists',
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  visualDensity: VisualDensity.compact,
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.table_chart_outlined, size: 18),
-                  tooltip: 'Tables',
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  visualDensity: VisualDensity.compact,
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.image_outlined, size: 18),
-                  tooltip: 'Images',
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  visualDensity: VisualDensity.compact,
-                ),
-                const SizedBox(width: 16),
-              ],
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(24),
-                child: Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    formattedDate,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: textColor.withOpacity(0.6),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            body: Column(
-              children: [
-                // Title field
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      hintText: 'Title',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                      hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
-                    ),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                    ),
-                    onChanged: (_) => _saveNote(),
-                    onSubmitted: (_) {
-                      _contentFocusNode.requestFocus();
-                    },
-                  ),
-                ),
-
-                // Content area - block-based markdown editor
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: UnifiedMarkdownEditor(
-                      initialMarkdown: _contentController.text,
-                      onChanged: (newContent) {
-                        _contentController.text = newContent;
-                        _saveNote();
-                      },
-                      showBlockControls: true,
-                    ),
-                  ),
-                ),
-              ],
-            ),
               ),
             ),
           ],

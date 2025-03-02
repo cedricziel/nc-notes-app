@@ -29,11 +29,19 @@ class UnifiedMarkdownEditor extends StatefulWidget {
   /// Whether to show block controls
   final bool showBlockControls;
 
+  /// The current editor mode
+  final EditorMode editorMode;
+
+  /// Callback when editor mode changes
+  final ValueChanged<EditorMode>? onEditorModeChanged;
+
   const UnifiedMarkdownEditor({
     super.key,
     required this.initialMarkdown,
     required this.onChanged,
     this.showBlockControls = true,
+    this.editorMode = EditorMode.editUnified,
+    this.onEditorModeChanged,
   });
 
   @override
@@ -55,8 +63,8 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
   // Map of block indices to their text ranges in the document
   late List<_BlockRange> _blockRanges;
 
-  // Current editor mode
-  EditorMode _editorMode = EditorMode.editUnified;
+  // Reference to the current editor mode from props
+  late EditorMode _editorMode;
 
   @override
   void initState() {
@@ -65,6 +73,7 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
     _controller = TextEditingController(text: widget.initialMarkdown);
     _focusNode = FocusNode();
     _scrollController = ScrollController();
+    _editorMode = widget.editorMode;
 
     // Initialize block ranges
     _updateBlockRanges();
@@ -89,6 +98,13 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
       }
 
       _updateBlockRanges();
+    }
+
+    // Update editor mode if it changed from props
+    if (oldWidget.editorMode != widget.editorMode) {
+      setState(() {
+        _editorMode = widget.editorMode;
+      });
     }
   }
 
@@ -191,68 +207,26 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Editor mode toggle
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ToggleButtons(
-                isSelected: [
-                  _editorMode == EditorMode.view,
-                  _editorMode == EditorMode.editUnified,
-                  _editorMode == EditorMode.editRaw,
-                ],
-                onPressed: (index) {
-                  setState(() {
-                    switch (index) {
-                      case 0:
-                        _editorMode = EditorMode.view;
-                        break;
-                      case 1:
-                        _editorMode = EditorMode.editUnified;
-                        break;
-                      case 2:
-                        _editorMode = EditorMode.editRaw;
-                        break;
-                    }
-                  });
-                },
-                borderRadius: BorderRadius.circular(8),
-                children: const [
-                  Tooltip(
-                    message: 'View',
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.visibility),
-                    ),
-                  ),
-                  Tooltip(
-                    message: 'Edit Unified',
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.edit),
-                    ),
-                  ),
-                  Tooltip(
-                    message: 'Edit Raw',
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.code),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
         // Editor content based on mode
         Expanded(
           child: _buildEditorContent(),
         ),
       ],
     );
+  }
+
+  // Helper method to update the editor mode
+  void _updateEditorMode(EditorMode mode) {
+    if (_editorMode != mode) {
+      setState(() {
+        _editorMode = mode;
+      });
+
+      // Notify parent if callback is provided
+      if (widget.onEditorModeChanged != null) {
+        widget.onEditorModeChanged!(mode);
+      }
+    }
   }
 
   /// Builds the appropriate editor content based on the current mode
