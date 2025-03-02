@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' as fpw;
 import '../../models/note.dart';
 import '../../providers/notes_provider.dart';
+import '../../utils/keyboard_shortcuts.dart';
 import '../../widgets/unified_markdown_editor.dart';
 import '../../widgets/sync_indicator.dart';
 import '../../widgets/platform/platform_scaffold.dart';
@@ -520,30 +521,51 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
       );
     }
 
-    return PlatformScaffold(
-      backgroundColor: backgroundColor,
-      appBar: PlatformAppBar(
-        title: Text(
-          title,
-          style: const TextStyle(
-            inherit: true,
-            fontFamily: 'SF Pro Text',
-            fontSize: 17.0,
-            fontWeight: FontWeight.w600,
+    // Wrap the scaffold with keyboard shortcuts
+    return Shortcuts(
+      shortcuts: EditorShortcuts.getShortcuts(),
+      child: Actions(
+        actions: {
+          SaveNoteIntent: CallbackAction<SaveNoteIntent>(
+            onInvoke: (SaveNoteIntent intent) {
+              _saveNoteImmediately();
+              // Show a snackbar to indicate the note was saved
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Note saved'),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+              return null;
+            },
           ),
-        ),
-        backgroundColor: backgroundColor,
-        trailingActions: appBarActions,
-        cupertino: (_, __) => fpw.CupertinoNavigationBarData(
-          // Disable transitions to avoid TextStyle interpolation issues
-          transitionBetweenRoutes: false,
-        ),
-      ),
-      body: editorContent,
-      material: (_, __) => fpw.MaterialScaffoldData(
-        bottomNavBar: Material(
-          color: backgroundColor,
-          child: formattingToolbar,
+        },
+        child: PlatformScaffold(
+          backgroundColor: backgroundColor,
+          appBar: PlatformAppBar(
+            title: Text(
+              title,
+              style: const TextStyle(
+                inherit: true,
+                fontFamily: 'SF Pro Text',
+                fontSize: 17.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: backgroundColor,
+            trailingActions: appBarActions,
+            cupertino: (_, __) => fpw.CupertinoNavigationBarData(
+              // Disable transitions to avoid TextStyle interpolation issues
+              transitionBetweenRoutes: false,
+            ),
+          ),
+          body: editorContent,
+          material: (_, __) => fpw.MaterialScaffoldData(
+            bottomNavBar: Material(
+              color: backgroundColor,
+              child: formattingToolbar,
+            ),
+          ),
         ),
       ),
     );

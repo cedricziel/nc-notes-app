@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/note.dart';
 import '../providers/notes_provider.dart';
+import '../utils/keyboard_shortcuts.dart';
 import 'unified_markdown_editor.dart';
 import 'sync_indicator.dart';
 
@@ -92,11 +94,30 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     final dateFormat = DateFormat('dd. MMMM yyyy um HH:mm');
     final formattedDate = dateFormat.format(widget.note.updatedAt);
 
-    return Row(
-      children: [
-        // Main content
-        Expanded(
-          child: Scaffold(
+    // Wrap the Row with keyboard shortcuts
+    return Shortcuts(
+      shortcuts: EditorShortcuts.getShortcuts(),
+      child: Actions(
+        actions: {
+          SaveNoteIntent: CallbackAction<SaveNoteIntent>(
+            onInvoke: (SaveNoteIntent intent) {
+              _saveNoteImmediately();
+              // Show a snackbar to indicate the note was saved
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Note saved'),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+              return null;
+            },
+          ),
+        },
+        child: Row(
+          children: [
+            // Main content
+            Expanded(
+              child: Scaffold(
             backgroundColor: backgroundColor,
             appBar: AppBar(
               backgroundColor: backgroundColor,
@@ -219,9 +240,11 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                 ),
               ],
             ),
-          ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
