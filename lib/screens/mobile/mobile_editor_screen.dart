@@ -372,26 +372,9 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
     // Build the editor content (shared between iOS and Android)
     final editorContent = Column(
       children: [
-        // Last edited info
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                'Last edited: $formattedDate',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textColor.withOpacity(0.6),
-                ),
-              ),
-            ],
-          ),
-        ),
-
         // Title field
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: PlatformTextField(
             controller: _titleController,
             decoration: InputDecoration(
@@ -463,6 +446,19 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
 
     // Build platform-specific actions
     List<Widget> appBarActions = [
+      // Last edited date in the app bar
+      Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: Center(
+          child: Text(
+            formattedDate,
+            style: TextStyle(
+              fontSize: 11,
+              color: textColor.withOpacity(0.6),
+            ),
+          ),
+        ),
+      ),
       // Sync indicator
       Consumer<NotesProvider>(
         builder: (context, provider, child) {

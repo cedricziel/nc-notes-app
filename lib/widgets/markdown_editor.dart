@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/note.dart';
@@ -147,60 +146,20 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                   leadingWidth: 60, // Adjust width to fit both icons
                   toolbarHeight: 36,
                   actions: [
-                    // Toolbar icons
-                    IconButton(
-                      icon: const Icon(Icons.text_format, size: 18),
-                      tooltip: 'Text Formatting',
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.format_list_bulleted, size: 18),
-                      tooltip: 'Lists',
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.table_chart_outlined, size: 18),
-                      tooltip: 'Tables',
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.image_outlined, size: 18),
-                      tooltip: 'Images',
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-                  bottom: PreferredSize(
-                    preferredSize: const Size.fromHeight(24),
-                    child: Container(
-                      width: double.infinity,
-                      padding:
-                          const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        formattedDate,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: textColor.withOpacity(0.6),
+                    // Last edited date in the app bar
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: Center(
+                        child: Text(
+                          formattedDate,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: textColor.withOpacity(0.6),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
                 body: Column(
                   children: [
@@ -271,6 +230,52 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                                 child: Icon(Icons.edit, size: 18),
                               ),
                             ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Formatting toolbar - moved from app bar to below title
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.text_format, size: 18),
+                            tooltip: 'Text Formatting',
+                            onPressed: () {},
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.format_list_bulleted,
+                                size: 18),
+                            tooltip: 'Lists',
+                            onPressed: () {},
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.table_chart_outlined,
+                                size: 18),
+                            tooltip: 'Tables',
+                            onPressed: () {},
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.image_outlined, size: 18),
+                            tooltip: 'Images',
+                            onPressed: () {},
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            visualDensity: VisualDensity.compact,
                           ),
                         ],
                       ),
