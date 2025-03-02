@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/markdown/markdown_document.dart';
 import '../services/markdown/blocks/markdown_block.dart';
+import 'platform/platform_text_field.dart';
 
 /// A unified markdown editor that allows seamless cursor navigation
 /// while maintaining the block-based document model.
@@ -214,37 +215,26 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
 
         // The actual editable text field (invisible layer for editing)
         Positioned.fill(
-          child: Material(
-            type: MaterialType.transparency, // Make it visually transparent
-            child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              maxLines: null,
-              // Use iOS keyboard appearance on iOS
-              keyboardAppearance:
-                  Theme.of(context).brightness == Brightness.dark
-                      ? Brightness.dark
-                      : Brightness.light,
-              // Enable scrolling physics for the text field
-              scrollPhysics: Theme.of(context).platform == TargetPlatform.iOS
-                  ? const BouncingScrollPhysics()
-                  : const ClampingScrollPhysics(),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-              ),
-              style: const TextStyle(
-                color: Colors.transparent, // Make text invisible
-                height: 1.5, // Match line height with rendered blocks
-              ),
-              // Ensure cursor is visible even though text is transparent
-              cursorColor:
-                  Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
-              onTap: () {
-                // Update cursor position when tapped
-                _updateCursorBlockIndex();
-              },
+          child: PlatformTextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            autofocus: false,
+            keyboardType: TextInputType.multiline,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
             ),
+            style: const TextStyle(
+              color: Colors.transparent, // Make text invisible
+              height: 1.5, // Match line height with rendered blocks
+            ),
+            onChanged: (_) {
+              // This is handled by the controller listener
+            },
+            onTap: () {
+              // Update cursor position when tapped
+              _updateCursorBlockIndex();
+            },
           ),
         ),
 

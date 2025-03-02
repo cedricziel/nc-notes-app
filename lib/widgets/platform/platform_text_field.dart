@@ -41,6 +41,12 @@ class PlatformTextField extends StatelessWidget {
   /// The padding around the text field.
   final EdgeInsetsGeometry? padding;
 
+  /// Called when the user taps on the text field.
+  final GestureTapCallback? onTap;
+
+  /// The focus node for this text field.
+  final FocusNode? focusNode;
+
   /// Creates a platform-aware text field.
   const PlatformTextField({
     super.key,
@@ -55,13 +61,17 @@ class PlatformTextField extends StatelessWidget {
     this.enabled = true,
     this.autofocus = false,
     this.padding,
+    this.onTap,
+    this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
     if (PlatformService.useCupertino) {
       // iOS-style text field
-      return CupertinoTextField(
+      // Wrap with GestureDetector if onTap is provided
+      Widget textField = CupertinoTextField(
+        focusNode: focusNode,
         controller: controller,
         placeholder: placeholder ?? decoration?.hintText,
         style: style,
@@ -91,9 +101,21 @@ class PlatformTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
       );
+
+      // Wrap with GestureDetector if onTap is provided
+      if (onTap != null) {
+        return GestureDetector(
+          onTap: onTap,
+          child: textField,
+        );
+      }
+
+      return textField;
     } else {
       // Android-style text field
+      // For Material, we can use the onTap parameter directly
       return TextField(
+        focusNode: focusNode,
         controller: controller,
         decoration: decoration ??
             InputDecoration(
@@ -106,6 +128,7 @@ class PlatformTextField extends StatelessWidget {
         onSubmitted: onSubmitted,
         onChanged: onChanged,
         enabled: enabled,
+        onTap: onTap,
       );
     }
   }
