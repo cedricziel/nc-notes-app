@@ -48,7 +48,7 @@ class AdmonitionBlock extends MarkdownBlock {
   Widget buildPreview(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _getAdmonitionColor(context, type).withOpacity(0.1),
+        color: _getAdmonitionColor(context, type).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: _getAdmonitionColor(context, type),
@@ -267,7 +267,7 @@ class _AdmonitionEditorState extends State<AdmonitionEditor> {
         Container(
           decoration: BoxDecoration(
             color: _getAdmonitionColor(context, _typeController.text)
-                .withOpacity(0.1),
+                .withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
               color: _getAdmonitionColor(context, _typeController.text),

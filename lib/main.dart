@@ -51,8 +51,7 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFFFFD700), // Gold accent color
         brightness: Brightness.light,
-        background: const Color(0xFFF5F5F5), // Light gray background
-        surface: const Color(0xFFF5F5F5),
+        surface: const Color(0xFFF5F5F5), // Light gray background
         onSurface: Colors.black87,
         primary: const Color(0xFF007bff), // Blue for selected items
       ),
@@ -99,7 +98,6 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFFFFD700),
         brightness: Brightness.dark,
-        background: const Color(0xFF2D2D2D),
         surface: const Color(0xFF2D2D2D),
         onSurface: Colors.white,
         primary: const Color(0xFF007bff),
@@ -170,12 +168,11 @@ class MyApp extends StatelessWidget {
     );
 
     // Create the home widget based on authentication state
+    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
     Widget homeWidget = isAuthenticated
         ? FutureBuilder(
             // Initialize the NotesProvider when the app starts with authentication
             future: Future.delayed(Duration.zero, () async {
-              final notesProvider =
-                  Provider.of<NotesProvider>(context, listen: false);
               if (!notesProvider.isAuthenticated) {
                 debugPrint('Auto-initializing NotesProvider on app start');
                 await notesProvider.login();

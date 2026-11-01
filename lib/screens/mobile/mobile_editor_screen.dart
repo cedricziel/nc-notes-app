@@ -125,8 +125,6 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
   void _showCupertinoActionSheet(BuildContext context) {
     if (_note == null) return;
 
-    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
@@ -359,7 +357,6 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = Theme.of(context).colorScheme.surface;
     final textColor = isDarkMode ? Colors.white : Colors.black;
-    final primaryColor = Theme.of(context).colorScheme.primary;
 
     // Format date for display
     final dateFormat = DateFormat('dd. MMMM yyyy, HH:mm');
@@ -381,7 +378,7 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
               hintText: 'Title',
               border: InputBorder.none,
               contentPadding: EdgeInsets.zero,
-              hintStyle: TextStyle(color: textColor.withOpacity(0.6)),
+              hintStyle: TextStyle(color: textColor.withValues(alpha: 0.6)),
             ),
             placeholder: 'Title',
             style: TextStyle(
@@ -454,7 +451,7 @@ class _MobileEditorScreenState extends State<MobileEditorScreen> {
             formattedDate,
             style: TextStyle(
               fontSize: 11,
-              color: textColor.withOpacity(0.6),
+              color: textColor.withValues(alpha: 0.6),
             ),
           ),
         ),

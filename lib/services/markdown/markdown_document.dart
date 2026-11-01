@@ -89,14 +89,9 @@ class MarkdownDocument {
 
     // Check for duplicate blocks in the output
     final uniqueOutputBlocks = <String>{};
-    int duplicateOutputCount = 0;
     for (final block in potentialBlocks) {
       if (block.trim().isNotEmpty) {
-        if (uniqueOutputBlocks.contains(block.trim())) {
-          duplicateOutputCount++;
-        } else {
-          uniqueOutputBlocks.add(block.trim());
-        }
+        uniqueOutputBlocks.add(block.trim());
       }
     }
 
