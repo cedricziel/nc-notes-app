@@ -24,37 +24,37 @@ void main() {
       expect(find.text('This is a paragraph.'), findsOneWidget);
     });
 
-    testWidgets('switches between preview and edit mode',
+    testWidgets('switches between view and edit modes',
         (WidgetTester tester) async {
       const initialMarkdown = '# Heading\n\nThis is a paragraph.';
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: UnifiedMarkdownEditor(
-              initialMarkdown: initialMarkdown,
-              onChanged: (_) {},
+      Future<void> pumpEditor(EditorMode mode) {
+        return tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: UnifiedMarkdownEditor(
+                initialMarkdown: initialMarkdown,
+                editorMode: mode,
+                onChanged: (_) {},
+              ),
             ),
           ),
-        ),
-      );
+        );
+      }
 
-      // Initially in edit mode
-      expect(find.text('Preview'), findsOneWidget);
+      // View mode renders the document without an editable text field
+      await pumpEditor(EditorMode.view);
+      expect(find.text('Heading'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
 
-      // Tap the preview button
-      await tester.tap(find.text('Preview'));
-      await tester.pump();
+      // Raw edit mode shows an editable text field only
+      await pumpEditor(EditorMode.editRaw);
+      expect(find.byType(TextField), findsOneWidget);
 
-      // Now in preview mode
-      expect(find.text('Edit'), findsOneWidget);
-
-      // Tap the edit button
-      await tester.tap(find.text('Edit'));
-      await tester.pump();
-
-      // Back to edit mode
-      expect(find.text('Preview'), findsOneWidget);
+      // Unified edit mode overlays the editable text field on rendered blocks
+      await pumpEditor(EditorMode.editUnified);
+      expect(find.text('Heading'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
     });
 
     testWidgets('updates content when text changes',
@@ -67,6 +67,7 @@ void main() {
           home: Scaffold(
             body: UnifiedMarkdownEditor(
               initialMarkdown: initialMarkdown,
+              editorMode: EditorMode.editRaw,
               onChanged: (content) {
                 updatedContent = content;
               },
@@ -107,14 +108,14 @@ void main() {
       expect(textField, findsOneWidget);
 
       // Set cursor position in the heading block
-      await tester.tap(find.text('Heading'));
+      await tester.tap(find.text('Heading'), warnIfMissed: false);
       await tester.pump();
 
-      // Verify that the heading block is visible
-      expect(find.text('Heading'), findsOneWidget);
+      // The active block shows its raw markdown syntax
+      expect(find.text('# Heading'), findsOneWidget);
 
       // Set cursor position in the paragraph block
-      await tester.tap(find.text('This is a paragraph.'));
+      await tester.tap(find.text('This is a paragraph.'), warnIfMissed: false);
       await tester.pump();
 
       // Verify that the paragraph block is visible
