@@ -151,6 +151,7 @@ class FoldersSidebar extends StatelessWidget {
                           if (notesProvider.isAuthenticated) {
                             // Logout
                             await notesProvider.logout();
+                            if (!context.mounted) return;
 
                             // Show success message
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -170,6 +171,7 @@ class FoldersSidebar extends StatelessWidget {
                                 builder: (context) => const LoginScreen(),
                               ),
                             );
+                            if (!context.mounted) return;
 
                             if (result == true) {
                               // Login successful, initialize API
@@ -184,6 +186,7 @@ class FoldersSidebar extends StatelessWidget {
 
                               try {
                                 final success = await notesProvider.login();
+                                if (!context.mounted) return;
                                 if (success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -198,11 +201,13 @@ class FoldersSidebar extends StatelessWidget {
                                   );
                                 }
                               } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'Error connecting to Nextcloud: $e')),
-                                );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Error connecting to Nextcloud: $e')),
+                                  );
+                                }
                                 notesProvider.setState(loading: false);
                               }
                             }
@@ -271,7 +276,7 @@ class FoldersSidebar extends StatelessWidget {
       leading: Icon(
         icon,
         size: 18,
-        color: isSelected ? selectedColor : textColor.withOpacity(0.7),
+        color: isSelected ? selectedColor : textColor.withValues(alpha: 0.7),
       ),
       title: Text(
         title,
@@ -285,7 +290,7 @@ class FoldersSidebar extends StatelessWidget {
         count,
         style: TextStyle(
           fontSize: 12,
-          color: textColor.withOpacity(0.5),
+          color: textColor.withValues(alpha: 0.5),
         ),
       ),
       dense: true,
@@ -293,7 +298,7 @@ class FoldersSidebar extends StatelessWidget {
       selected: isSelected,
       selectedTileColor: isDarkMode
           ? const Color(0xFF3D3D3D)
-          : const Color(0xFFE5E5E5).withOpacity(0.5),
+          : const Color(0xFFE5E5E5).withValues(alpha: 0.5),
       onTap: onTap,
       onLongPress: onLongPress,
     );
@@ -315,10 +320,10 @@ class FoldersSidebar extends StatelessWidget {
       ),
       backgroundColor: isDarkMode
           ? (isSelected
-              ? const Color(0xFF3D3D3D).withOpacity(0.7)
+              ? const Color(0xFF3D3D3D).withValues(alpha: 0.7)
               : const Color(0xFF3D3D3D))
           : (isSelected
-              ? const Color(0xFFE5E5E5).withOpacity(0.7)
+              ? const Color(0xFFE5E5E5).withValues(alpha: 0.7)
               : const Color(0xFFE5E5E5)),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     );

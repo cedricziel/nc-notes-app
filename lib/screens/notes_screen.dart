@@ -23,7 +23,6 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final notesProvider = Provider.of<NotesProvider>(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = Theme.of(context).colorScheme.surface;
 

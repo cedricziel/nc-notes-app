@@ -143,7 +143,7 @@ class NotesList extends StatelessWidget {
         color: isSelected
             ? (isDarkMode
                 ? const Color(0xFF3D3D3D)
-                : const Color(0xFFE5E5E5).withOpacity(0.5))
+                : const Color(0xFFE5E5E5).withValues(alpha: 0.5))
             : Colors.transparent,
         border: Border(
           bottom: BorderSide(
@@ -162,7 +162,8 @@ class NotesList extends StatelessWidget {
             Icon(
               noteIcon,
               size: 16,
-              color: isSelected ? selectedColor : textColor.withOpacity(0.6),
+              color:
+                  isSelected ? selectedColor : textColor.withValues(alpha: 0.6),
             ),
           ],
         ),
@@ -185,7 +186,7 @@ class NotesList extends StatelessWidget {
               formattedDate,
               style: TextStyle(
                 fontSize: 11,
-                color: textColor.withOpacity(0.5),
+                color: textColor.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -197,7 +198,7 @@ class NotesList extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 11,
-                  color: textColor.withOpacity(0.7),
+                  color: textColor.withValues(alpha: 0.7),
                 ),
               )
             : null,

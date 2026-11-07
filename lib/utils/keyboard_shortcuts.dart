@@ -11,11 +11,6 @@ class SaveNoteIntent extends Intent {
 class EditorShortcuts {
   /// Returns a map of keyboard shortcuts for the editor
   static Map<ShortcutActivator, Intent> getShortcuts() {
-    // Use Command on macOS, Control on other platforms
-    final LogicalKeyboardKey modifierKey = PlatformService.isMacOS
-        ? LogicalKeyboardKey.meta
-        : LogicalKeyboardKey.control;
-
     return {
       // Save shortcut (Command+S or Ctrl+S)
       SingleActivator(LogicalKeyboardKey.keyS,

@@ -164,8 +164,9 @@ class PlatformTheme {
     if (isCupertino(context)) {
       return [
         BoxShadow(
-          color:
-              CupertinoColors.separator.resolveFrom(context).withOpacity(0.3),
+          color: CupertinoColors.separator
+              .resolveFrom(context)
+              .withValues(alpha: 0.3),
           blurRadius: 5.0,
           offset: const Offset(0, 2),
         ),
@@ -173,7 +174,7 @@ class PlatformTheme {
     } else {
       return [
         BoxShadow(
-          color: Colors.black.withOpacity(0.1),
+          color: Colors.black.withValues(alpha: 0.1),
           blurRadius: 5.0,
           offset: const Offset(0, 2),
         ),
