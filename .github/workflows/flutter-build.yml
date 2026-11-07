@@ -34,10 +34,15 @@ jobs:
         run: |
           flutter build ios --release --no-codesign
 
+      # Unsigned debug build: CI has no Apple signing certificates/provisioning
+      # profiles, so we only verify the macOS build compiles (board decision on
+      # LAB-38, option 1). Debug builds use ad-hoc signing on macOS runners;
+      # `--no-codesign` is iOS-only and not accepted by `flutter build macos`.
+      # No signing config, certificates or secrets.
       - name: Build macOS
         if: contains(matrix.build-targets, 'macos')
         run: |
-          flutter build macos --release
+          flutter build macos --debug
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -45,4 +50,4 @@ jobs:
           name: build-outputs-${{ matrix.os }}
           path: |
             build/ios/iphoneos
-            build/macos/Build/Products/Release
+            build/macos/Build/Products/Debug
