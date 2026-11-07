@@ -108,9 +108,10 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
           onPressed: () async {
             // Create a new note
             await notesProvider.addNote();
+            if (!context.mounted) return;
 
             // Navigate to the editor for the new note
-            if (notesProvider.selectedNote != null && mounted) {
+            if (notesProvider.selectedNote != null) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -225,7 +226,7 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
             Icon(
               noteIcon,
               size: 20,
-              color: textColor.withOpacity(0.6),
+              color: textColor.withValues(alpha: 0.6),
             ),
           ],
         ),
@@ -248,7 +249,7 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
               formattedDate,
               style: TextStyle(
                 fontSize: 12,
-                color: textColor.withOpacity(0.5),
+                color: textColor.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -260,7 +261,7 @@ class _MobileNotesScreenState extends State<MobileNotesScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 14,
-                  color: textColor.withOpacity(0.7),
+                  color: textColor.withValues(alpha: 0.7),
                 ),
               )
             : null,
