@@ -167,54 +167,6 @@ class MyApp extends StatelessWidget {
       ),
     );
 
-    // Create the home widget based on authentication state
-    final notesProvider = Provider.of<NotesProvider>(context, listen: false);
-    Widget homeWidget = isAuthenticated
-        ? FutureBuilder(
-            // Initialize the NotesProvider when the app starts with authentication
-            future: Future.delayed(Duration.zero, () async {
-              if (!notesProvider.isAuthenticated) {
-                debugPrint('Auto-initializing NotesProvider on app start');
-                await notesProvider.login();
-              }
-              return true;
-            }),
-            builder: (context, snapshot) {
-              // Show loading indicator while initializing
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return PlatformService.useCupertino
-                    ? CupertinoPageScaffold(
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              CupertinoActivityIndicator(),
-                              SizedBox(height: 16),
-                              Text('Loading your notes...'),
-                            ],
-                          ),
-                        ),
-                      )
-                    : Scaffold(
-                        body: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text('Loading your notes...'),
-                            ],
-                          ),
-                        ),
-                      );
-              }
-
-              // Show the responsive notes layout once initialized
-              return const ResponsiveNotesLayout();
-            },
-          )
-        : const LoginScreen();
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => NotesProvider()),
@@ -229,24 +181,81 @@ class MyApp extends StatelessWidget {
             macos: PlatformStyle.Cupertino,
           ),
         ),
-        builder: (context) => PlatformApp(
-          title: 'Flutter Notes',
-          material: (_, __) => MaterialAppData(
-            theme: lightTheme,
-            darkTheme: darkTheme,
-            debugShowCheckedModeBanner: false,
-          ),
-          cupertino: (_, __) => CupertinoAppData(
-            theme: cupertinoTheme,
-            debugShowCheckedModeBanner: false,
-          ),
-          home: homeWidget,
-          localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-            DefaultMaterialLocalizations.delegate,
-            DefaultWidgetsLocalizations.delegate,
-            DefaultCupertinoLocalizations.delegate,
-          ],
-        ),
+        // The home widget is built below MultiProvider so it can look up
+        // NotesProvider; MyApp's own build context sits above it.
+        builder: (context) {
+          // Look up NotesProvider below MultiProvider, outside any async gap.
+          final notesProvider = Provider.of<NotesProvider>(
+            context,
+            listen: false,
+          );
+          // Create the home widget based on authentication state
+          Widget homeWidget = isAuthenticated
+              ? FutureBuilder(
+                  // Initialize the NotesProvider when the app starts with authentication
+                  future: Future.delayed(Duration.zero, () async {
+                    if (!notesProvider.isAuthenticated) {
+                      debugPrint(
+                          'Auto-initializing NotesProvider on app start');
+                      await notesProvider.login();
+                    }
+                    return true;
+                  }),
+                  builder: (context, snapshot) {
+                    // Show loading indicator while initializing
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return PlatformService.useCupertino
+                          ? CupertinoPageScaffold(
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    CupertinoActivityIndicator(),
+                                    SizedBox(height: 16),
+                                    Text('Loading your notes...'),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : Scaffold(
+                              body: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    CircularProgressIndicator(),
+                                    SizedBox(height: 16),
+                                    Text('Loading your notes...'),
+                                  ],
+                                ),
+                              ),
+                            );
+                    }
+
+                    // Show the responsive notes layout once initialized
+                    return const ResponsiveNotesLayout();
+                  },
+                )
+              : const LoginScreen();
+
+          return PlatformApp(
+            title: 'Flutter Notes',
+            material: (_, __) => MaterialAppData(
+              theme: lightTheme,
+              darkTheme: darkTheme,
+              debugShowCheckedModeBanner: false,
+            ),
+            cupertino: (_, __) => CupertinoAppData(
+              theme: cupertinoTheme,
+              debugShowCheckedModeBanner: false,
+            ),
+            home: homeWidget,
+            localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+              DefaultCupertinoLocalizations.delegate,
+            ],
+          );
+        },
       ),
     );
   }

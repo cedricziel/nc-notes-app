@@ -45,16 +45,16 @@ void main() {
       // View mode renders the document without an editable text field
       await pumpEditor(EditorMode.view);
       expect(find.text('Heading'), findsOneWidget);
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(EditableText), findsNothing);
 
       // Raw edit mode shows an editable text field only
       await pumpEditor(EditorMode.editRaw);
-      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byType(EditableText), findsOneWidget);
 
       // Unified edit mode overlays the editable text field on rendered blocks
       await pumpEditor(EditorMode.editUnified);
       expect(find.text('Heading'), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byType(EditableText), findsOneWidget);
     });
 
     testWidgets('updates content when text changes',
@@ -77,7 +77,7 @@ void main() {
       );
 
       // Find the TextField
-      final textField = find.byType(TextField);
+      final textField = find.byType(EditableText);
       expect(textField, findsOneWidget);
 
       // Enter text in the TextField
@@ -104,7 +104,7 @@ void main() {
       );
 
       // Find the TextField
-      final textField = find.byType(TextField);
+      final textField = find.byType(EditableText);
       expect(textField, findsOneWidget);
 
       // Set cursor position in the heading block
