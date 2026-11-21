@@ -49,7 +49,6 @@ void main() {
         (WidgetTester tester) async {
       const content = 'Test paragraph';
       final block = ParagraphBlock(content: content);
-      String? updatedContent;
 
       // Build the editor widget
       await tester.pumpWidget(
@@ -57,12 +56,7 @@ void main() {
           home: Scaffold(
             body: Builder(
               builder: (context) {
-                return block.buildEditor(
-                  context,
-                  (value) {
-                    updatedContent = value;
-                  },
-                );
+                return block.buildEditor(context, (_) {});
               },
             ),
           ),

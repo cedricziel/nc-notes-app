@@ -154,7 +154,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                           formattedDate,
                           style: TextStyle(
                             fontSize: 11,
-                            color: textColor.withOpacity(0.6),
+                            color: textColor.withValues(alpha: 0.6),
                           ),
                         ),
                       ),
@@ -177,7 +177,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.zero,
                                 hintStyle: TextStyle(
-                                    color: textColor.withOpacity(0.6)),
+                                    color: textColor.withValues(alpha: 0.6)),
                               ),
                               style: TextStyle(
                                 fontSize: 20,

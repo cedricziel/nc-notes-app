@@ -61,8 +61,8 @@ class _CursorAwareEditorState extends State<CursorAwareEditor> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor = isDarkMode
-        ? Colors.grey[700]!.withOpacity(0.3)
-        : Colors.grey[300]!.withOpacity(0.5);
+        ? Colors.grey[700]!.withValues(alpha: 0.3)
+        : Colors.grey[300]!.withValues(alpha: 0.5);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
