@@ -215,20 +215,6 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
     );
   }
 
-  // Helper method to update the editor mode
-  void _updateEditorMode(EditorMode mode) {
-    if (_editorMode != mode) {
-      setState(() {
-        _editorMode = mode;
-      });
-
-      // Notify parent if callback is provided
-      if (widget.onEditorModeChanged != null) {
-        widget.onEditorModeChanged!(mode);
-      }
-    }
-  }
-
   /// Builds the appropriate editor content based on the current mode
   Widget _buildEditorContent() {
     switch (_editorMode) {
@@ -472,8 +458,8 @@ class _UnifiedMarkdownEditorState extends State<UnifiedMarkdownEditor> {
       MarkdownBlock block, bool isActive, int index) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final borderColor = isDarkMode
-        ? Colors.grey[700]!.withOpacity(0.3)
-        : Colors.grey[300]!.withOpacity(0.5);
+        ? Colors.grey[700]!.withValues(alpha: 0.3)
+        : Colors.grey[300]!.withValues(alpha: 0.5);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),

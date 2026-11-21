@@ -49,7 +49,7 @@ class HoverAwareAdmonitionBlock extends MarkdownAwareBlock {
   Widget buildPreview(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _getAdmonitionColor(context, type).withOpacity(0.1),
+        color: _getAdmonitionColor(context, type).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: _getAdmonitionColor(context, type),
@@ -224,8 +224,8 @@ class _HoverAwareAdmonitionEditorState
   Widget _buildFormattedView(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color:
-            _getAdmonitionColor(context, widget.initialType).withOpacity(0.1),
+        color: _getAdmonitionColor(context, widget.initialType)
+            .withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
           color: _getAdmonitionColor(context, widget.initialType),

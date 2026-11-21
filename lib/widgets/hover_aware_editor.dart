@@ -76,8 +76,8 @@ class _HoverAwareEditorState extends State<HoverAwareEditor> {
     final showMarkdown = _isHovering || _isFocused;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final hoverColor = isDarkMode
-        ? Colors.grey[800]!.withOpacity(0.3)
-        : Colors.grey[200]!.withOpacity(0.5);
+        ? Colors.grey[800]!.withValues(alpha: 0.3)
+        : Colors.grey[200]!.withValues(alpha: 0.5);
 
     return MouseRegion(
       onEnter: (_) => _onHoverChanged(true),
@@ -91,7 +91,7 @@ class _HoverAwareEditorState extends State<HoverAwareEditor> {
           borderRadius: BorderRadius.circular(4),
           border: showMarkdown
               ? Border.all(
-                  color: Theme.of(context).dividerColor.withOpacity(0.3),
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
                   width: 1,
                 )
               : null,

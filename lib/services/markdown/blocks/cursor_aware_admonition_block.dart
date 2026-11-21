@@ -75,28 +75,28 @@ class CursorAwareAdmonitionBlock extends MarkdownAwareBlock {
     switch (type.toLowerCase()) {
       case 'info':
         backgroundColor = isDarkMode
-            ? Colors.blue.shade900.withOpacity(0.2)
+            ? Colors.blue.shade900.withValues(alpha: 0.2)
             : Colors.blue.shade50;
         borderColor = Colors.blue.shade300;
         icon = Icons.info_outline;
         break;
       case 'warning':
         backgroundColor = isDarkMode
-            ? Colors.orange.shade900.withOpacity(0.2)
+            ? Colors.orange.shade900.withValues(alpha: 0.2)
             : Colors.orange.shade50;
         borderColor = Colors.orange.shade300;
         icon = Icons.warning_amber_outlined;
         break;
       case 'danger':
         backgroundColor = isDarkMode
-            ? Colors.red.shade900.withOpacity(0.2)
+            ? Colors.red.shade900.withValues(alpha: 0.2)
             : Colors.red.shade50;
         borderColor = Colors.red.shade300;
         icon = Icons.dangerous_outlined;
         break;
       case 'success':
         backgroundColor = isDarkMode
-            ? Colors.green.shade900.withOpacity(0.2)
+            ? Colors.green.shade900.withValues(alpha: 0.2)
             : Colors.green.shade50;
         borderColor = Colors.green.shade300;
         icon = Icons.check_circle_outline;
@@ -104,7 +104,7 @@ class CursorAwareAdmonitionBlock extends MarkdownAwareBlock {
       case 'note':
       default:
         backgroundColor = isDarkMode
-            ? Colors.grey.shade800.withOpacity(0.2)
+            ? Colors.grey.shade800.withValues(alpha: 0.2)
             : Colors.grey.shade100;
         borderColor = Colors.grey.shade400;
         icon = Icons.note_outlined;
@@ -145,7 +145,7 @@ class CursorAwareAdmonitionBlock extends MarkdownAwareBlock {
                       fontWeight: FontWeight.bold,
                       color: isDarkMode
                           ? borderColor
-                          : borderColor.withOpacity(0.8),
+                          : borderColor.withValues(alpha: 0.8),
                     ),
                   ),
                 ],
